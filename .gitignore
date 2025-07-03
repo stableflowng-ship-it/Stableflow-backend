@@ -1,0 +1,11 @@
+.idea/
+.vscode/
+node_modules/
+build/
+tmp/
+temp/
+.env
+.env.prod
+package-lock.json
+backup-action.txt
+# ca-certificate.crt
