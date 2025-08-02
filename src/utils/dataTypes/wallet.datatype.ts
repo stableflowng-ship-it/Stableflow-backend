@@ -11,3 +11,12 @@ export type WalletAddressRequest = {
     wallet_type: string;
   };
 }
+
+export type CreateWallet = {
+  businessId: string
+  coinType: CoinType
+  coinNetwork: CoinNetwork
+}
+
+export type CoinType = 'usdc' | 'usdt'
+export type CoinNetwork = 'bep20'

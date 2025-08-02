@@ -32,20 +32,15 @@ export class Business {
   @Column({ default: false })
   is_verified: boolean;
 
+  @Column({ default: false })
+  is_active: boolean;
+
   @Column({
     type: "enum",
     enum: Object.values(OnboardingStep),
     default: OnboardingStep.NOT_STARTED,
   })
   onboarding_step: OnboardingStep;
-
-  // Blockchain wallet address
-  @Column({ nullable: true, length: 42 })
-  wallet_address: string;
-
-  // Blockchain wallet ID from BlockRadar
-  @Column({ nullable: true, length: 36 })
-  address_id: string;
 
   // Category relationship
   @ManyToOne(() => Category, (category) => category.businesses, {
@@ -66,6 +61,9 @@ export class Business {
   @Column()
   owner_id: string;
 
+  @OneToMany(() => Transaction, (transaction) => transaction.business)
+  transactions: Transaction[];
+
   // Bank details relationship
   @OneToOne(() => BankDetails, (bankDetails) => bankDetails.business, {
     eager: true,
@@ -73,14 +71,8 @@ export class Business {
   })
   bankDetails: BankDetails;
 
-  @Column({ default: false })
-  is_active: boolean;
-
   @UpdateDateColumn()
   update_at: Date;
-
-  @OneToMany(() => Transaction, (transaction) => transaction.business)
-  transactions: Transaction[];
 
   @CreateDateColumn()
   created_on: Date
