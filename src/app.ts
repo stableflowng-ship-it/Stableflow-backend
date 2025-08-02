@@ -20,7 +20,7 @@ app.register(require('@fastify/basic-auth'), {
 // cors configuration
 const check: string[] = []
 const corsEnv = check.map(str => str.replace(/'/g, "\""));
-app.register(cors, (_) => {
+app.register(cors, () => {
   return (_: FastifyRequest, callback: Function) => {
     const corsOptions = {
       // origin: envHelper.environ === 'localhost'

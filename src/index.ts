@@ -22,7 +22,7 @@ const startServer = async () => {
       }
     });
   } catch (e) {
-    app.log.error(e)
+    app.log.error(e as string)
     process.exit(1)
   }
 }

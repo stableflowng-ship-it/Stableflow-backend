@@ -14,7 +14,7 @@ export class AdminController {
       const data = { ...successData, data: response, message: "All business" }
       reply.code(200).send(data)
     } catch (e) {
-      const error = { ...failureData, error: e.message }
+      const error = { ...failureData, error: e.message as string }
       reply.code(400).send(error)
     }
   }
@@ -25,7 +25,7 @@ export class AdminController {
       const data = { ...successData, data: response, message: "All business" }
       reply.code(200).send(data)
     } catch (e) {
-      const error = { ...failureData, error: e.message }
+      const error = { ...failureData, error: e.message as string }
       reply.code(400).send(error)
     }
   }

@@ -47,7 +47,9 @@ export class WalletServive {
     const text = await body.text();
     const response = JSON.parse(text);
     console.log(response)
-    const walletAddress = response.data?.address;
-    const addressId = response.data?.id;
+    const walletAddress: string = response.data?.address;
+    const addressId: string = response.data?.id;
+
+    return
   }
 }

@@ -4,6 +4,7 @@ import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { BusiFilterType } from "../../utils/dataTypes/general.dataype"
+import { WalletServive } from "../wallet/wallet.service"
 
 const busiRepo = AppDataSource.getRepository(Business)
 
@@ -22,18 +23,19 @@ export class AdminService {
   }
 
   static approveBusiness = async (params: { id: string }) => {
-    const busi = await busiRepo.createQueryBuilder('busi').where('busi.id = :busiId', { busiId: params.id }).getOne()
+    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :busiId', { busiId: params.id }).getOne()
 
-    if (!busi) {
+    if (!business) {
       throw new HttpException(400, 'Business not found')
     }
 
-    if (busi.onboarding_step === OnboardingStep.APPROVED) {
+    if (business.onboarding_step === OnboardingStep.APPROVED) {
       return { message: 'Business already approved' }
     }
 
-    busi.onboarding_step = OnboardingStep.APPROVED
-    await busiRepo.save(busi)
+    business.onboarding_step = OnboardingStep.APPROVED
+    const generateWallet = await WalletServive.generateWalletAddress({ busiId: business.id })
+    await busiRepo.save(business)
 
     return { message: 'Business approved' }
   }

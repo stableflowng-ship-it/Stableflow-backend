@@ -28,6 +28,7 @@ export const createBusiOpts = {
       }
     }
   },
+  preHandler: isAuth,
   handler: BusinessController.createBusiness
 }
 

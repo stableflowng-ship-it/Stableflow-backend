@@ -13,7 +13,7 @@ export class UserController {
       const data = { ...successData, message: response.message, data: response.otp }
       return reply.code(201).send(data)
     } catch (e) {
-      const error = { ...failureData, message: e.message }
+      const error = { ...failureData, message: e.message as string }
       reply.code(400).send(error)
     }
   }
@@ -32,7 +32,7 @@ export class UserController {
       }
       ).send(data)
     } catch (e) {
-      const error = { ...failureData, message: e.message }
+      const error = { ...failureData, message: e.message as string }
       reply.code(400).send(error)
     }
   }

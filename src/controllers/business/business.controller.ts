@@ -12,7 +12,7 @@ export class BusinessController {
       const data = { ...successData, message: '' }
       reply.code(201).send(data)
     } catch (e: any) {
-      const error = { ...failureData, error: e.message }
+      const error = { ...failureData, error: e.message as string }
       reply.code(400).send(error)
     }
   }
@@ -23,7 +23,7 @@ export class BusinessController {
       const data = { ...successData, data: response, message: 'Business data fetch' }
       reply.code(200).send(data)
     } catch (e) {
-      const error = { ...failureData, error: e.message }
+      const error = { ...failureData, error: e.message as string }
       reply.code(e.status || 400).send(error)
     }
   }
@@ -34,7 +34,7 @@ export class BusinessController {
       const data = { ...successData, data: response, message: 'Business update' }
       reply.code(200).send(data)
     } catch (e) {
-      const error = { ...failureData, error: e.message }
+      const error = { ...failureData, error: e.message as string }
       reply.code(e.status || 400).send(error)
     }
   }
