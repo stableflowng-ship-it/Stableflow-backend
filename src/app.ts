@@ -100,8 +100,11 @@ const prefix: string = "/api/v1"
 app.get('/api', async (_: FastifyRequest, reply: FastifyReply) => {
   reply.send({ 'message': 'Stablecoin api' })
 })
+
+// register all routes
 app.register(require('./routes/auth/auth.routes'), { prefix: `${prefix}/auth` })
 app.register(require('./routes/business/business.routes'), { prefix: `${prefix}/business` })
 app.register(require('./routes/admin/admin.routes'), { prefix: `${prefix}/admin` })
+app.register(require('./routes/wallet/wallet.routes'), { prefix: `${prefix}/wallet` })
 
 export default app

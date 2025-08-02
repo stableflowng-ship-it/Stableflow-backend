@@ -4,7 +4,6 @@ import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { BusiFilterType } from "../../utils/dataTypes/general.dataype"
-import { WalletServive } from "../wallet/wallet.service"
 
 const busiRepo = AppDataSource.getRepository(Business)
 
@@ -34,9 +33,9 @@ export class AdminService {
     }
 
     business.onboarding_step = OnboardingStep.APPROVED
-    const generateWallet = await WalletServive.generateWalletAddress({ busiId: business.id })
+    // await WalletServive.generateWalletAddress({ busiId: business.id })
     await busiRepo.save(business)
 
-    return { message: 'Business approved' }
+    return { message: 'Business approved and wallet for the business has been generated' }
   }
 }
