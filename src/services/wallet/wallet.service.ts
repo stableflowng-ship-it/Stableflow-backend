@@ -5,6 +5,7 @@ import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { Wallet } from "../../entities/business/wallet.entity"
+import { User } from "../../entities/user/user.entities"
 import { CreateWallet, WalletAddressRequest } from "../../utils/dataTypes/wallet.datatype"
 import { request } from 'undici'
 
@@ -67,15 +68,23 @@ export class WalletService {
     return `${params.coinNetwork} ${params.coinType} wallet created for business`
   }
 
-  static getBusinessWallets = async (businessId: string) => {
+  static getBusinessWallets = async (businessId: string, user: User) => {
     const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).getOne()
 
     if (!business) {
       throw new HttpException(400, "Business doesn't exist")
     }
 
+    if (business.owner_id !== user.id) {
+      throw new HttpException(403, 'Forbidden')
+    }
+
     const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getMany()
 
     return { data: wallets, message: '' }
+  }
+
+  static webhookBlockradar = async () => {
+
   }
 }

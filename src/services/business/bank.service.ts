@@ -1,11 +1,13 @@
 // 
 
+import { envHelper } from "../../config/env.helper";
 import HttpException from "../../config/error.config";
 import { AppDataSource } from "../../data-source";
 import { BankDetails } from "../../entities/business/bank-details.entity";
 import { Business } from "../../entities/business/business.entity";
 import { User } from "../../entities/user/user.entities";
 import { BankType } from "../../utils/dataTypes/bank.datatype";
+import { request } from 'undici'
 
 
 const busiRepo = AppDataSource.getRepository(Business)
@@ -28,5 +30,20 @@ export class BankService {
     await bankRepo.save(newBank)
 
     return 'Business bank created'
+  }
+
+  static verifyBank = async (payload: { accountNumber: string, bankCode: string }) => {
+    const verifyUrl = `https://nubapi.com/api/verify?account_number=${payload.accountNumber}&bank_code=${payload.bankCode}`;
+
+    const response = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', Authorization: envHelper.nubapi.token }
+    })
+
+    if (!response.ok) {
+      throw new HttpException(400, 'Bank cannot be verified')
+    }
+    const data = await response.json()
+    return data
   }
 }

@@ -17,4 +17,15 @@ export class BankController {
       reply.code(400).send(error)
     }
   }
+
+  static verifyBank = async (req: FastifyRequest<{ Querystring: { accountNumber: string, bankCode: string } }>, reply: FastifyReply) => {
+    try {
+      const response = await BankService.verifyBank(req.query)
+      const data = { ...successData, message: response, code: 201 }
+      reply.code(201).send(data)
+    } catch (e) {
+      const error = { ...failureData, error: e.message as string }
+      reply.code(400).send(error)
+    }
+  }
 }

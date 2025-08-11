@@ -2,7 +2,7 @@
 
 import { FastifyPluginAsync } from "fastify";
 import { createBusiOpts, getBusiOpts, updateBusiOpts } from "../../schemas/business/business.schema";
-import { createBankOpts } from "../../schemas/business/bank.schema";
+import { createBankOpts, verifyBank } from "../../schemas/business/bank.schema";
 
 
 const businessRoutes: FastifyPluginAsync = async (fastify) => {
@@ -12,6 +12,7 @@ const businessRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post('/add-bank', createBankOpts)
   //get urls
   fastify.get('/get-business/:id', getBusiOpts)
+  fastify.get('/verify-bank', verifyBank)
 };
 
 export default businessRoutes

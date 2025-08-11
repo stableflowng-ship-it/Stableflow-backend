@@ -52,3 +52,19 @@ export const getBusinessWallets = {
   preHandler: isAuth,
   handler: WalletControllers.getBusinessWallets
 }
+
+export const blockRadarWebhook = {
+  schema: {
+    tags: ["Wallet"],
+    summary: 'Blockradar webhook',
+    response: {
+      200: {
+        description: 'Blockradar webhook',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  // preHandler: isAuth,
+  handler: WalletControllers.webhookBlockradar
+} 

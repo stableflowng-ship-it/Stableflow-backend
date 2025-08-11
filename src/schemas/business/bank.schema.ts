@@ -11,7 +11,10 @@ const bankSchema = T.Object({
   accountNumber: T.String(),
   accountName: T.String()
 })
-
+const verifySchema = T.Object({
+  accountNumber: T.String(),
+  bankCode: T.String()
+})
 
 export const createBankOpts = {
   schema: {
@@ -28,4 +31,21 @@ export const createBankOpts = {
   },
   preHandler: isAuth,
   handler: BankController.addBankAccount
+}
+
+export const verifyBank = {
+  schema: {
+    tags: ['Businesses'],
+    summary: "Verify bank account",
+    query: verifySchema,
+    response: {
+      201: {
+        description: 'Bank account',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  preHandler: isAuth,
+  handler: BankController.verifyBank
 }
