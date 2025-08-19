@@ -32,8 +32,8 @@ export class Category {
   @Column({ nullable: true })
   ownerId: string;
 
-  @OneToMany(() => Business, (business) => business.category)
-  businesses: Business[];
+  // @OneToMany(() => Business, (business) => business.category)
+  // businesses: Business[];
 
   @CreateDateColumn()
   createdAt: Date;

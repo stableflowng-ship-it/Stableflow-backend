@@ -2,6 +2,7 @@
 
 import { AdminController } from "../../controllers/admin/admin.controller";
 import { OnboardingStep } from "../../entities/business/business.entity";
+import { isAuth } from "../../utils/middleware";
 import { successDataSchema } from "../../utils/response.helper";
 import { Type as T } from "@sinclair/typebox"
 
@@ -32,6 +33,7 @@ export const getAllBusiOpts = {
       }
     }
   },
+  preHandler: [isAuth],
   handler: AdminController.getAllBusiness
 }
 

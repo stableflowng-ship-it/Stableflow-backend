@@ -15,7 +15,7 @@ export const OnboardingStep = {
 
 export type OnboardingStep = keyof typeof OnboardingStep;
 
-@Entity("businesses")
+@Entity()
 export class Business {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -43,12 +43,12 @@ export class Business {
   onboarding_step: OnboardingStep;
 
   // Category relationship
-  @ManyToOne(() => Category, (category) => category.businesses, {
-    nullable: true,
-    eager: true,
-  })
-  @JoinColumn({ name: "categoryId" })
-  category: Category;
+  // @ManyToOne(() => Category, (category) => category.businesses, {
+  //   nullable: true,
+  //   eager: true,
+  // })
+  // @JoinColumn({ name: "categoryId" })
+  // category: Category;
 
   @Column({ nullable: true })
   category_id: string;

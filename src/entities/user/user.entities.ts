@@ -8,6 +8,12 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
+export const UserType = {
+  USER: "USER",
+  BUSINESS_OWNER: "BUSINESS_OWNER",
+  ADMIN: "ADMIN",
+} as const;
+
 @Entity("users")
 export class User {
   @PrimaryGeneratedColumn("uuid")
@@ -28,11 +34,14 @@ export class User {
   @Column({ default: false })
   is_phone_verified: boolean;
 
-  @Column({ nullable: true })
-  wallet_address: string;
+  @Column({ default: UserType.USER })
+  account_type: string
 
-  @Column({ type: "text", nullable: true })
-  encryptedMnemonic?: string;
+  // @Column({ nullable: true })
+  // wallet_address: string;
+
+  // @Column({ type: "text", nullable: true })
+  // encryptedMnemonic?: string;
 
   @Column({ default: true })
   is_active: boolean;

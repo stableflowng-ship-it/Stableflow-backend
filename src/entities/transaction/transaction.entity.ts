@@ -44,7 +44,7 @@ export class Transaction {
   @Column({ nullable: true })
   fiat_currency: string;
 
-  @Column({ nullable: false })
+  @Column()
   token: string;
 
   @Column({ nullable: false })

@@ -8,6 +8,7 @@ import { Business } from './entities/business/business.entity';
 import { Transaction } from './entities/transaction/transaction.entity';
 import { Category } from './entities/business/category.entity';
 import { BankDetails } from './entities/business/bank-details.entity';
+import { Wallet } from './entities/business/wallet.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -19,7 +20,7 @@ export const AppDataSource = new DataSource({
   ssl: false,
   synchronize: true,
   logging: false,
-  entities: [User, Business, Transaction, Category, BankDetails],
+  entities: [User, Business, Transaction, Category, BankDetails, Wallet],
   subscribers: [],
   migrations: [],
 });

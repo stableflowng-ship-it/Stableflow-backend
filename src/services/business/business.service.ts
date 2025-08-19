@@ -17,10 +17,11 @@ export class BusinessService {
     newBusiness.owner_id = user.id
     newBusiness.email = payload.email
     newBusiness.phone_number = payload.phone_number
+    newBusiness.name = payload.name
 
     const saved = await busiRepo.save(newBusiness)
 
-    return ""
+    return "Business created"
   }
 
   static getBusiness = async (params: { id: string }, user: User) => {

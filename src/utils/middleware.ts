@@ -30,3 +30,8 @@ export const isAuth = async (req: FastifyRequest, reply: FastifyReply) => {
     reply.code(401).send(error)
   }
 }
+
+export const isAdmin = async (req: FastifyRequest, reply: FastifyReply) => {
+  const user = req.user
+  // if(user.)
+}
