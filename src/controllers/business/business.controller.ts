@@ -9,7 +9,7 @@ export class BusinessController {
   static createBusiness = async (req: FastifyRequest<{ Body: BusinessType }>, reply: FastifyReply) => {
     try {
       const response = await BusinessService.createBusiness(req.user, req.body)
-      const data = { ...successData, message: '' }
+      const data = { ...successData, message: response, code: 201 }
       reply.code(201).send(data)
     } catch (e: any) {
       const error = { ...failureData, error: e.message as string }

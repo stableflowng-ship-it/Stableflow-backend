@@ -13,6 +13,15 @@ export const envHelper = {
     network: process.env.NETWORK,
     wallet_id: process.env.WALLET_ID,
   },
+  paycrest: {
+    api_key: process.env.PAYCREST_API,
+  },
+  redis: {
+    host: process.env.REDIS_HOST,
+    pass: process.env.REDIS_PASSWORD,
+    user: process.env.REDIS_USERNAME,
+    port: process.env.REDIS_PORT
+  },
   nubapi: {
     token: process.env.NUBAPI_TOKEN
   },

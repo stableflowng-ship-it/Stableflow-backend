@@ -5,16 +5,19 @@ import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { Wallet } from "../../entities/business/wallet.entity"
+import { Transaction } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
-import { CreateWallet, WalletAddressRequest } from "../../utils/dataTypes/wallet.datatype"
+import { CreateWallet, GetRate, WalletAddressRequest, WebhookPayload } from "../../utils/dataTypes/wallet.datatype"
 import { request } from 'undici'
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
+const transRepo = AppDataSource.getRepository(Transaction)
 
 const apiKey = envHelper.block_radar.api_key
 const walletId = envHelper.block_radar.wallet_id
-const b_baseUrl = "https://api.blockradar.co/v1/wallets/"
+const b_baseUrl = "https://api.blockradar.co/v1/wallets"
+const p_baseUrl = "https://api.paycrest.io/v1"
 
 export class WalletService {
   static generateWalletAddress = async (params: CreateWallet) => {
@@ -42,7 +45,7 @@ export class WalletService {
       metadata: {
         business_id: business.id,
         user_id: business.owner_id,
-        wallet_type: "bep20usdt",
+        wallet_type: "bep20usdc",
       },
       name: `${formatBusiName}_${business.id}`,
       showPrivateKey: false,
@@ -84,7 +87,78 @@ export class WalletService {
     return { data: wallets, message: '' }
   }
 
-  static webhookBlockradar = async () => {
+  static webhookBlockradar = async (payload: WebhookPayload) => {
+    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId', { addressId: payload.data.address.id }).getOne()
+    const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
 
+    if (payload.event === "deposit.success") {
+      const newTrans = transRepo.create({
+        transaction_id: payload.data.id,
+        business_id: business.id,
+        token_amount: parseFloat(payload.data.amount),
+        fiat_amount: 0,
+        fiat_currency: 'ngn',
+        token: payload.data.asset.symbol,
+        chain: payload.data.asset['standard'],
+        // status: 
+        txHash: payload.data['blockHash'],
+        senderAddress: payload.data.senderAddress,
+        businessAddress: wallet.wallet_address,
+        address_id: wallet.address_id,
+        wallet_id: wallet.id,
+        exchange_rate: 0,
+        business: business
+      })
+
+      await transRepo.save(newTrans)
+    }
   }
+
+  static getRatePaycrest = async (payload: GetRate) => {
+    const response = await fetch(`${p_baseUrl}/rates/${payload.token}/${payload.amount}/${payload.currency}?network=${payload.network}`, {
+      method: "GET",
+      headers: { 'content-type': 'application/json' },
+    })
+    if (!response.ok) {
+      throw new HttpException(400, `Rate fetch failed: ${response.statusText}`);
+    }
+    const rateData: any = await response.json();
+    return rateData.data;
+  }
+
+  static createOrderPaycrest = async () => {
+    const rate = this.getRatePaycrest({ token: "USDT", amount: 100, currency: "NGN", network: 'base' })
+    const orderData = {
+      amount: 100,
+      token: 'USDT',
+      network: 'base',
+      rate: rate, // Use the fetched rate
+      recipient: {
+        institution: 'GTB',
+        accountIdentifier: '1234567890',
+        accountName: 'John Doe',
+        currency: 'NGN',
+        memo: 'Salary payment for January 2024' // Optional: Purpose/narration for the payment
+      },
+      reference: 'payment-123',
+      returnAddress: '0x1234567890123456789012345678901234567890'
+    };
+    const response = await fetch(`${p_baseUrl}/sender/orders`, {
+      method: "POST",
+      headers: {
+        "API-Key": envHelper.paycrest.api_key,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(orderData)
+    });
+    const order = await response.json();
+
+    // const { id, receiveAddress, validUntil, senderFee, transactionFee} = order;
+
+    return 'Order created'
+  }
+
+  static
 }
+
+

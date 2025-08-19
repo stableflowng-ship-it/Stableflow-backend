@@ -1,7 +1,7 @@
 // 
 
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateWallet } from "../../utils/dataTypes/wallet.datatype";
+import { CreateWallet, WebhookPayload } from "../../utils/dataTypes/wallet.datatype";
 import { WalletService } from "../../services/wallet/wallet.service";
 import { failureData, successData } from "../../utils/response.helper";
 
@@ -31,11 +31,11 @@ export class WalletControllers {
     }
   }
 
-  static webhookBlockradar = async (req: FastifyRequest, reply: FastifyReply) => {
+  static webhookBlockradar = async (req: FastifyRequest<{ Body: WebhookPayload }>, reply: FastifyReply) => {
     try {
-      const response = await WalletService.webhookBlockradar()
-      const data = { ...successData, data: response, message: 'Webhook for blockradar' }
-      reply.code(200).send(data)
+      const response = await WalletService.webhookBlockradar(req.body)
+      const data = { ...successData, data: response, message: 'Webhook for blockradar', code: 201 }
+      reply.code(201).send(data)
     } catch (e) {
       const error = { ...failureData, error: e.message as string }
       reply.code(e.status || 400).send(error)

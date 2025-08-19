@@ -1,10 +1,12 @@
 //
 import Redis from 'ioredis';
+import { envHelper } from './env.helper';
 
 export const redis = new Redis({
-  host: '127.0.0.1',
-  port: 6379,
-  // password: 'your_password', // uncomment if needed
+  host: envHelper.redis.host,
+  port: Number(envHelper.redis.port),
+  password: envHelper.redis.pass,
+  username: envHelper.redis.user,
   retryStrategy(times) {
     const delay = Math.min(times * 50, 2000);
     console.log(`🔁 Reconnecting to Redis... attempt ${times}, waiting ${delay}ms`);

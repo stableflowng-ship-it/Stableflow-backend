@@ -22,7 +22,7 @@ export const createBusiOpts = {
     body: T.Required(busiSchema),
     response: {
       201: {
-        description: 'Account verified',
+        description: 'Business created',
         type: 'object',
         ...successDataSchema
       }

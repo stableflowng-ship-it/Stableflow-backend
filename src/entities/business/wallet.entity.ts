@@ -15,12 +15,15 @@ export class Wallet {
   @Column()
   network: CoinNetwork
 
+  @Column({ type: 'float', default: 0 })
+  amount: number
+
   // Blockchain wallet address
-  @Column({ length: 42 })
+  @Column({ length: 42, unique: true })
   wallet_address: string;
 
   // Blockchain wallet ID from BlockRadar
-  @Column({ length: 36 })
+  @Column({ length: 36, unique: true })
   address_id: string;
 
   @ManyToOne(() => Business)

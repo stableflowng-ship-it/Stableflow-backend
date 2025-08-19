@@ -21,17 +21,37 @@ export type CreateWallet = {
 export type CoinType = 'usdc' | 'usdt'
 export type CoinNetwork = 'bep20'
 
-export type BlockradarHook = {
-  event: "deposit.success" | "withdraw.success"
-  data: {
-    id: string
+export type WebhookPayload = {
+  id?: string;
+  event?: string;
+  data?: {
+    id?: string;
     reference: string
-    senderAddress: string,
-    amount: string
-    amountPaid: string
-    blockNumber: number
-    blockHash: string
-    hash: string
+    event?: string;
+    event_type?: string;
+    eventType?: string;
+    recipientAddress?: string;
+    senderAddress?: string;
+    amount?: string;
     type: string
-  }
+    asset?: {
+      symbol?: string;
+      name: string
+    };
+    address: {
+      id: string,
+      address: string
+      [key: string]: any;
+    }
+    currency?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+export type GetRate = {
+  token: string
+  amount: number
+  currency: string
+  network: string
 }
