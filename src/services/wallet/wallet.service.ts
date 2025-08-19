@@ -8,7 +8,6 @@ import { Wallet } from "../../entities/business/wallet.entity"
 import { Transaction } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
 import { CreateWallet, GetRate, WalletAddressRequest, WebhookPayload } from "../../utils/dataTypes/wallet.datatype"
-import { request } from 'undici'
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
