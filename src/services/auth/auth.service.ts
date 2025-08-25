@@ -15,13 +15,16 @@ const userRepo = AppDataSource.getRepository(User)
 export class UserServices {
 
   static createOrSignIn = async (payload: SignInPayload) => {
-    let user = await userRepo.createQueryBuilder('user').addSelect('user.password').where('user.email = :email AND user.password = :password', { email: payload.email, password: payload.password }).getOne()
+    let user = await userRepo.createQueryBuilder('user').addSelect('user.password').where('user.email = :email AND user.password = :password', { email: payload.email }).getOne()
     if (!user) {
       user = userRepo.create({
         email: payload.email,
         password: bcrypt.hash(payload.password, 10),
         is_active: true
       })
+    }
+    if(!bcrypt.compare(payload.password, user.password)){
+      throw new HttpException(400, "Invalid credentials")
     }
     await userRepo.save(user) // alway update for login
     const otp = await sendOtp(user.email)
