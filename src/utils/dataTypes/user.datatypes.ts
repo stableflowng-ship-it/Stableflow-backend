@@ -7,6 +7,11 @@ export type Auth = {
   otp: string
 }
 
+export type SignInPayload = {
+  email: string,
+  password: string
+}
+
 declare module 'fastify' {
   interface FastifyRequest {
     user: User;

@@ -25,6 +25,9 @@ export class User {
   @Column({ nullable: true })
   full_name: string;
 
+  @Column({select: false})
+  password: string;
+
   @Column({ nullable: true })
   phone_number: string;
 

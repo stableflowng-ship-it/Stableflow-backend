@@ -8,7 +8,6 @@ import { Wallet } from "../../entities/business/wallet.entity"
 import { Transaction } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
 import { CreateWallet, GetRate, WalletAddressRequest, WebhookPayload } from "../../utils/dataTypes/wallet.datatype"
-import { request } from 'undici'
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
@@ -51,13 +50,13 @@ export class WalletService {
       showPrivateKey: false,
     };
 
-    const { body } = await request(`${b_baseUrl}/${walletId}/addresses`, {
+    const body  = await fetch(`${b_baseUrl}/${walletId}/addresses`, {
       method: "POST",
       headers: { 'content-type': 'application/json', "x-api-key": apiKey },
       body: JSON.stringify(data)
     })
-    const text = await body.text();
-    const response = JSON.parse(text);
+    const text:any = await body.json();
+    const response = text.data;
     console.log(response)
     const newWallet = walletRepo.create({
       address_id: response.data?.id,
