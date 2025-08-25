@@ -1,13 +1,13 @@
 // 
 
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Auth } from "../../utils/dataTypes/user.datatypes";
+import { Auth, SignInPayload } from "../../utils/dataTypes/user.datatypes";
 import { UserServices } from "../../services/auth/auth.service";
 import { failureData, successData } from "../../utils/response.helper";
 import { envHelper } from "../../config/env.helper";
 
 export class UserController {
-  static createOrSignIn = async (req: FastifyRequest<{ Body: Auth }>, reply: FastifyReply) => {
+  static createOrSignIn = async (req: FastifyRequest<{ Body: SignInPayload }>, reply: FastifyReply) => {
     try {
       const response = await UserServices.createOrSignIn(req.body)
       const data = { ...successData, message: response.message, data: response.otp }

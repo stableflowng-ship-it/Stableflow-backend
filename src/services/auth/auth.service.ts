@@ -5,18 +5,21 @@ import HttpException from "../../config/error.config"
 import { sendOtp, verifyOtp } from "../../config/redis.config"
 import { AppDataSource } from "../../data-source"
 import { User } from "../../entities/user/user.entities"
-import { Auth } from "../../utils/dataTypes/user.datatypes"
+import { Auth, SignInPayload } from "../../utils/dataTypes/user.datatypes"
 import { envHelper } from "../../config/env.helper"
 var jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const userRepo = AppDataSource.getRepository(User)
 
 export class UserServices {
-  static createOrSignIn = async (payload: Auth) => {
-    let user = await userRepo.createQueryBuilder('user').where('user.email = :email', { email: payload.email }).getOne()
+
+  static createOrSignIn = async (payload: SignInPayload) => {
+    let user = await userRepo.createQueryBuilder('user').addSelect('user.password').where('user.email = :email AND user.password = :password', { email: payload.email, password: payload.password }).getOne()
     if (!user) {
       user = userRepo.create({
         email: payload.email,
+        password: bcrypt.hash(payload.password, 10),
         is_active: true
       })
     }
@@ -24,7 +27,7 @@ export class UserServices {
     const otp = await sendOtp(user.email)
 
     return { message: "otp sent", otp }
-  }
+   }
 
   static verifyAccount = async (payload: Auth) => {
     const user = await userRepo.createQueryBuilder('user').where('user.email = :email', { email: payload.email }).getOne()
