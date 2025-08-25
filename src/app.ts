@@ -4,6 +4,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import cors from '@fastify/cors'
 import cookie from '@fastify/cookie';
 import fastifySwagger from '@fastify/swagger';
+import { envHelper } from "./config/env.helper";
 const app = require('fastify')({
   logger: true
 })
@@ -18,13 +19,15 @@ app.register(require('@fastify/basic-auth'), {
 });
 
 // cors configuration
-const check: string[] = []
-const corsEnv = check.map(str => str.replace(/'/g, "\""));
+
+const check: any = envHelper.cors
+const corsEnv: any = JSON.parse(check.replace(/'/g, "\""));
+
 app.register(cors, () => {
   return (_: FastifyRequest, callback: Function) => {
     const corsOptions = {
-      // origin: envHelper.environ === 'localhost'
-      origin: true
+      origin: envHelper.environ === 'localhost'
+      // origin: true
         ? true
         : corsEnv,
       methods: ['GET', 'HEAD', 'OPTIONS', 'PUT', 'PATCH', 'POST', 'DELETE'],

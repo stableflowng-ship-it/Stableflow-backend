@@ -25,6 +25,7 @@ export const envHelper = {
   nubapi: {
     token: process.env.NUBAPI_TOKEN
   },
+  cors: process.env.CORS,
   environ: process.env.ENVIRONMENT,
   token_pass: process.env.TOKEN_PASSWORD
 }
