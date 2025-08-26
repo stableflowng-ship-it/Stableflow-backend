@@ -16,7 +16,7 @@ const userRepo = AppDataSource.getRepository(User)
 export class UserServices {
 
   static createOrSignIn = async (payload: SignInPayload) => {
-    let user = await userRepo.createQueryBuilder('user').addSelect('user.password').where('user.email = :email', { email: payload.email }).getOne()
+    let user = await userRepo.createQueryBuilder('user').where('user.email = :email', { email: payload.email }).getOne()
     if (!user) {
       user = userRepo.create({
         email: payload.email,
