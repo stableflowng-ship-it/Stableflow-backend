@@ -9,7 +9,7 @@ export type Auth = {
 
 export type SignInPayload = {
   email: string,
-  password: string
+  // password: string
 }
 
 declare module 'fastify' {

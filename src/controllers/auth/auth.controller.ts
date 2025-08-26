@@ -10,7 +10,7 @@ export class UserController {
   static createOrSignIn = async (req: FastifyRequest<{ Body: SignInPayload }>, reply: FastifyReply) => {
     try {
       const response = await UserServices.createOrSignIn(req.body)
-      const data = { ...successData, message: response.message, data: response.otp }
+      const data = { ...successData, message: response.message }
       return reply.code(201).send(data)
     } catch (e) {
       const error = { ...failureData, message: e.message as string }
