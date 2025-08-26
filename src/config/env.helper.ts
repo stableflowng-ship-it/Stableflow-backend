@@ -8,6 +8,12 @@ export const envHelper = {
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE,
   },
+  email: {
+    host: process.env.NOREPLY_HOST,
+    username: process.env.NOREPLY_USERNAME,
+    password: process.env.NOREPLY_PASSWORD,
+    email: process.env.NOREPLY_EMAIL,
+  },
   block_radar: {
     api_key: process.env.BLOCKRADAR_API_KEY,
     network: process.env.NETWORK,
