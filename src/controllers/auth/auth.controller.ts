@@ -27,7 +27,7 @@ export class UserController {
         path: '/',
         httpOnly: true,
         secure: envHelper.environ !== "localhost",
-        sameSite: envHelper.environ === "localhost" ? 'none' : 'none',
+        sameSite: envHelper.environ === "localhost" ? 'lax' : 'none',
         domain: envHelper.environ !== "localhost" ? '' : undefined,
         maxAge: 60 * 60 * 24 * 14,
       }
