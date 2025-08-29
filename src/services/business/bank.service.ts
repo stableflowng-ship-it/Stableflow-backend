@@ -13,6 +13,10 @@ import { request } from 'undici'
 const busiRepo = AppDataSource.getRepository(Business)
 const bankRepo = AppDataSource.getRepository(BankDetails)
 
+const paystack = 'https://api.paystack.co/'
+const url = 'https://nubapi.com/banks';
+
+
 export class BankService {
   static addBankAccount = async (payload: BankType, user: User) => {
     const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId: payload.businessId }).getOne()
@@ -32,16 +36,28 @@ export class BankService {
     return 'Business bank created'
   }
 
+
+  static fecthBanks = async () => {
+
+    const response = await fetch(`${paystack}bank?country=nigeria`, { method: 'GET', headers: { 'content-type': 'application/json' } })
+
+    if (!response.ok) {
+      throw new HttpException(400, 'Unable to fetch banks')
+    }
+    const data = await response.json()
+    return data
+  }
+
   static verifyBank = async (payload: { accountNumber: string, bankCode: string }) => {
-    const verifyUrl = `https://nubapi.com/api/verify?account_number=${payload.accountNumber}&bank_code=${payload.bankCode}`;
+    const verifyUrl = `${paystack}bank/resolve?account_number=${payload.accountNumber}&bank_code=${payload.bankCode}`
 
     const response = await fetch(verifyUrl, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', Authorization: envHelper.nubapi.token }
+      method: 'GET',
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${envHelper.paystack.secret_key}`, }
     })
 
     if (!response.ok) {
-      throw new HttpException(400, 'Bank cannot be verified')
+      throw new HttpException(400, response.statusText || 'Unable to verify bank account')
     }
     const data = await response.json()
     return data

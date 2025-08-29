@@ -12,8 +12,9 @@ export class UserController {
       const response = await UserServices.createOrSignIn(req.body)
       const data = { ...successData, message: response.message }
       return reply.code(201).send(data)
-    } catch (e) {
-      const error = { ...failureData, message: e.message as string }
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
     }
   }
@@ -25,14 +26,15 @@ export class UserController {
         "auth_token", response.token, {
         path: '/',
         httpOnly: true,
-        secure: envHelper.environ !== "dev",
-        sameSite: envHelper.environ === "dev" ? 'lax' : 'none',
-        domain: envHelper.environ !== "dev" ? '' : undefined,
+        secure: envHelper.environ !== "localhost",
+        sameSite: envHelper.environ === "localhost" ? 'lax' : 'none',
+        domain: envHelper.environ !== "localhost" ? '' : undefined,
         maxAge: 60 * 60 * 24 * 14,
       }
       ).send(data)
-    } catch (e) {
-      const error = { ...failureData, message: e.message as string }
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
     }
   }

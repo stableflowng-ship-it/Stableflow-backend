@@ -33,6 +33,21 @@ export const createBankOpts = {
   handler: BankController.addBankAccount
 }
 
+export const fetchBanksOpts = {
+  schema: {
+    tags: ['Businesses'],
+    summary: "Fetch list of banks",
+    response: {
+      200: {
+        description: 'Bank list',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  // preHandler: isAuth,
+  handler: BankController.fecthBanks
+}
 export const verifyBank = {
   schema: {
     tags: ['Businesses'],
@@ -46,6 +61,6 @@ export const verifyBank = {
       }
     }
   },
-  preHandler: isAuth,
+  // preHandler: isAuth,
   handler: BankController.verifyBank
 }

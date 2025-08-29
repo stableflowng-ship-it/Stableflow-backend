@@ -12,8 +12,21 @@ export class BankController {
       const response = await BankService.addBankAccount(req.body, req.user)
       const data = { ...successData, message: response, code: 201 }
       reply.code(201).send(data)
-    } catch (e) {
-      const error = { ...failureData, error: e.message as string }
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
+
+  static fecthBanks = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const response = await BankService.fecthBanks()
+      const data = { ...successData, message: 'All nigeria banks', data: response, code: 200 }
+      reply.code(200).send(data)
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
     }
   }
@@ -21,10 +34,11 @@ export class BankController {
   static verifyBank = async (req: FastifyRequest<{ Querystring: { accountNumber: string, bankCode: string } }>, reply: FastifyReply) => {
     try {
       const response = await BankService.verifyBank(req.query)
-      const data = { ...successData, message: response, code: 201 }
-      reply.code(201).send(data)
-    } catch (e) {
-      const error = { ...failureData, error: e.message as string }
+      const data = { ...successData, message: 'Bank verified', data: response, code: 200 }
+      reply.code(200).send(data)
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
     }
   }

@@ -1,5 +1,6 @@
 // 
 
+import { createHmac } from "crypto"
 import { envHelper } from "../../config/env.helper"
 import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
@@ -25,15 +26,15 @@ export class WalletService {
     if (!business) {
       throw new HttpException(400, 'Business doesn\'t exist')
     }
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id = :busiId', { busiId: business.id }).getMany()
+    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id = :busiId AND wallet.coin_type =:coinType AND wallet.network =:network', { busiId: business.id, coinType: params.coinType, network: params.coinNetwork }).getOne()
 
     if (business.onboarding_step !== OnboardingStep.APPROVED) {
       throw new HttpException(400, `Business(${business.name}) is not yet Approved`)
     }
 
-    const checkWallet = wallet.find((obj) => obj.coin_type === params.coinType && obj.network === params.coinNetwork)
-
-    if (checkWallet) {
+    // const checkWallet = wallet.find((obj) => obj.coin_type === params.coinType && obj.network === params.coinNetwork)
+    console.log(wallet)
+    if (wallet) {
       throw new HttpException(400, `Business(${business.name}) already has this type of wallet address`)
     }
     const formatBusiName = business.name.replace(/\s+/g, "_");
@@ -50,17 +51,19 @@ export class WalletService {
       showPrivateKey: false,
     };
 
-    const body  = await fetch(`${b_baseUrl}/${walletId}/addresses`, {
+    const body = await fetch(`${b_baseUrl}/${walletId}/addresses`, {
       method: "POST",
       headers: { 'content-type': 'application/json', "x-api-key": apiKey },
       body: JSON.stringify(data)
     })
-    const text:any = await body.json();
+    const text: any = await body.json();
     const response = text.data;
     console.log(response)
+    // const response = { data: { id: "addr_123456", address: "0x1234567890abcdef" } }
     const newWallet = walletRepo.create({
-      address_id: response.data?.id,
-      wallet_address: response.data?.address,
+      address_id: response?.id,
+      wallet_address: response?.address,
+      logoUrl: response.blockchain.logoUrl,
       coin_type: params.coinType,
       network: params.coinNetwork,
       business: business,
@@ -81,12 +84,13 @@ export class WalletService {
       throw new HttpException(403, 'Forbidden')
     }
 
-    const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getMany()
+    const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getOne()
 
     return { data: wallets, message: '' }
   }
 
   static webhookBlockradar = async (payload: WebhookPayload) => {
+    console.log(payload)
     const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId', { addressId: payload.data.address.id }).getOne()
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
 
@@ -110,6 +114,10 @@ export class WalletService {
       })
 
       await transRepo.save(newTrans)
+
+      wallet.amount = wallet.amount + parseFloat(payload.data.amount)
+      await walletRepo.save(wallet)
+
     }
   }
 
@@ -157,7 +165,6 @@ export class WalletService {
     return 'Order created'
   }
 
-  static
 }
 
 

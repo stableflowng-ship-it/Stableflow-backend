@@ -33,5 +33,8 @@ export const envHelper = {
   },
   cors: process.env.CORS,
   environ: process.env.ENVIRONMENT,
-  token_pass: process.env.TOKEN_PASSWORD
+  token_pass: process.env.TOKEN_PASSWORD,
+  paystack: {
+    secret_key: process.env.PAYSTACK_SECRET_KEY,
+  }
 }

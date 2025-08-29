@@ -13,6 +13,9 @@ export class Wallet {
   coin_type: CoinType
 
   @Column()
+  logoUrl: string
+
+  @Column()
   network: CoinNetwork
 
   @Column({ type: 'float', default: 0 })
