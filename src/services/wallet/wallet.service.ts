@@ -58,6 +58,7 @@ export class WalletService {
     })
     const text: any = await body.json();
     const response = text.data;
+    console.log(response)
     // const response = { data: { id: "addr_123456", address: "0x1234567890abcdef" } }
     const newWallet = walletRepo.create({
       address_id: response?.id,
@@ -89,7 +90,7 @@ export class WalletService {
   }
 
   static webhookBlockradar = async (payload: WebhookPayload) => {
-
+    console.log(payload)
     const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId', { addressId: payload.data.address.id }).getOne()
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
 
@@ -113,6 +114,10 @@ export class WalletService {
       })
 
       await transRepo.save(newTrans)
+
+      wallet.amount = wallet.amount + parseFloat(payload.data.amount)
+      await walletRepo.save(wallet)
+
     }
   }
 

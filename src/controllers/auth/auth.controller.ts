@@ -26,9 +26,9 @@ export class UserController {
         "auth_token", response.token, {
         path: '/',
         httpOnly: true,
-        secure: envHelper.environ !== "dev",
-        sameSite: envHelper.environ === "dev" ? 'lax' : 'none',
-        domain: envHelper.environ !== "dev" ? '' : undefined,
+        secure: envHelper.environ !== "localhost",
+        sameSite: envHelper.environ === "localhost" ? 'lax' : 'none',
+        domain: envHelper.environ !== "localhost" ? '' : undefined,
         maxAge: 60 * 60 * 24 * 14,
       }
       ).send(data)
