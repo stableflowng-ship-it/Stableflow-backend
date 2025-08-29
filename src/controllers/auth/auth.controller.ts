@@ -28,7 +28,7 @@ export class UserController {
         httpOnly: true,
         secure: envHelper.environ !== "localhost",
         sameSite: envHelper.environ === "localhost" ? 'lax' : 'none',
-        domain: envHelper.environ !== "localhost" ? '' : undefined,
+        domain: envHelper.environ !== "localhost" ? ".stable-flow.xyz" : undefined,
         maxAge: 60 * 60 * 24 * 14,
       }
       ).send(data)
