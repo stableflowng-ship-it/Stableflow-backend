@@ -13,8 +13,9 @@ export class AdminController {
       const response = await AdminService.getAllBusiness(req.query)
       const data = { ...successData, data: response, message: "All business" }
       reply.code(200).send(data)
-    } catch (e) {
-      const error = { ...failureData, error: e.message as string }
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
     }
   }
@@ -24,8 +25,9 @@ export class AdminController {
       const response = await AdminService.approveBusiness(req.params)
       const data = { ...successData, data: response, message: "All business" }
       reply.code(200).send(data)
-    } catch (e) {
-      const error = { ...failureData, error: e.message as string }
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
     }
   }

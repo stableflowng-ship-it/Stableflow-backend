@@ -32,7 +32,6 @@ export class Transaction {
   transaction_id: string;
 
   @Column({ nullable: false })
-  @Index()
   business_id: string;
 
   @Column({ type: "float", default: 0 })

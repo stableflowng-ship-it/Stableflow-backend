@@ -27,7 +27,7 @@ app.register(cors, () => {
   return (_: FastifyRequest, callback: Function) => {
     const corsOptions = {
       origin: envHelper.environ === 'localhost'
-      // origin: true
+        // origin: true
         ? true
         : corsEnv,
       methods: ['GET', 'HEAD', 'OPTIONS', 'PUT', 'PATCH', 'POST', 'DELETE'],
@@ -109,5 +109,6 @@ app.register(require('./routes/auth/auth.routes'), { prefix: `${prefix}/auth` })
 app.register(require('./routes/business/business.routes'), { prefix: `${prefix}/business` })
 app.register(require('./routes/admin/admin.routes'), { prefix: `${prefix}/admin` })
 app.register(require('./routes/wallet/wallet.routes'), { prefix: `${prefix}/wallet` })
+app.register(require('./routes/transaction/transaction.routes'), { prefix: `${prefix}/transaction` })
 
 export default app

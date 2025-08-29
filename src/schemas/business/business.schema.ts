@@ -6,8 +6,9 @@ import { isAuth } from "../../utils/middleware";
 
 const busiSchema = T.Object({
   name: T.String(),
-  email: T.String({ format: "email" }),
-  phone_number: T.String()
+  // email: T.String({ format: "email" }),
+  phone_number: T.String(),
+  category_name: T.String()
 })
 
 const getBusinessSch = T.Object({
@@ -47,6 +48,21 @@ export const getBusiOpts = {
   },
   preHandler: isAuth,
   handler: BusinessController.getBusiness
+}
+export const getUserBusiOpts = {
+  schema: {
+    tags: ['Businesses'],
+    summary: "Fecth user's business",
+    response: {
+      200: {
+        description: 'Business details',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  preHandler: isAuth,
+  handler: BusinessController.getUserBusiness
 }
 
 export const updateBusiOpts = {

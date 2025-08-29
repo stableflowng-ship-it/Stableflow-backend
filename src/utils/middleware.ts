@@ -17,16 +17,14 @@ export const isAuth = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const token = req.cookies.auth_token;
     const decodedToken: Decode = jwt.verify(token, envHelper.token_pass)
-    console.log(decodedToken, '_____________')
     const user = await userRepo.createQueryBuilder('user').where('user.email = :email', { email: decodedToken.email }).getOne()
-
     if (!user) {
       throw new HttpException(401, 'You are not authenticated')
     }
     req.user = user
     return req.user
   } catch (e) {
-    const error = { ...failureData, error: 'You are not authenticated' }
+    const error = { ...failureData, error: 'You are not authenticated', code: 401 }
     reply.code(401).send(error)
   }
 }

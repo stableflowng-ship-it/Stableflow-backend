@@ -42,15 +42,15 @@ export class BankDetails {
   })
   accountType: AccountType;
 
-  @Column({ type: "uuid" })
-  businessId: string;
-
-  @Column({ type: "timestamp", nullable: true })
-  lastVerifiedAt: Date;
-
   @OneToOne(() => Business, (business) => business.bankDetails)
   @JoinColumn({ name: "businessId" })
   business: Business;
+
+  @Column({ type: "uuid" })
+  businessId: string;
+
+  // @Column({ type: "timestamp", nullable: true })
+  // lastVerifiedAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;

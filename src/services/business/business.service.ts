@@ -15,13 +15,14 @@ export class BusinessService {
     const newBusiness = new Business
     newBusiness.owner = user
     newBusiness.owner_id = user.id
-    newBusiness.email = payload.email
+    newBusiness.email = user.email
     newBusiness.phone_number = payload.phone_number
     newBusiness.name = payload.name
+    newBusiness.category_name = payload.category_name
 
     const saved = await busiRepo.save(newBusiness)
 
-    return "Business created"
+    return { message: "Business created", data: saved }
   }
 
   static getBusiness = async (params: { id: string }, user: User) => {
@@ -30,6 +31,11 @@ export class BusinessService {
     if (getBusi.owner_id !== user.id) {
       throw new HttpException(401, 'You are not authorize to access this')
     }
+    return getBusi
+  }
+
+  static getUserBusiness = async (user: User) => {
+    const getBusi = await busiRepo.createQueryBuilder('busi').where('busi.owner_id = :ownerId', { ownerId: user.id }).getOne()
     return getBusi
   }
 

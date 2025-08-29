@@ -53,6 +53,9 @@ export class Business {
   @Column({ nullable: true })
   category_id: string;
 
+  @Column({ nullable: true })
+  category_name: string;
+
   // Owner relationship
   @ManyToOne(() => User)
   @JoinColumn({ name: "ownerId" })
