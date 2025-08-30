@@ -90,8 +90,10 @@ export class WalletService {
   static webhookBlockradar = async (payload: WebhookPayload) => {
     console.log('payload', payload)
     // const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address }).getOne()
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.wallet_address =:address', { addressId: payload.data.recipientAddress, address: payload.data.address }).getOne()
+    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.wallet_address =:address', { address: payload.data.recipientAddress }).getOne()
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
+    console.log('wallet', payload.data.address.address)
+    console.log('wallet id', payload.data.address.id)
 
     if (payload.event === "deposit.success" && wallet && business) {
       console.log('data', payload)
