@@ -94,6 +94,7 @@ export class WalletService {
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
     console.log('wallet', payload.data.address.address)
     console.log('wallet id', payload.data.address.id)
+    console.log('wallet id', payload.data.asset.standard)
 
     if (payload.event === "deposit.success" && wallet && business) {
       console.log('data', payload)
@@ -104,7 +105,7 @@ export class WalletService {
         fiat_amount: 0,
         fiat_currency: 'ngn',
         token: payload.data.asset.symbol,
-        chain: payload.data.asset.standard,
+        chain: payload.data.asset.standard || "BEP",
         // status: 
         txHash: payload.data.blockHash,
         senderAddress: payload.data.senderAddress,
