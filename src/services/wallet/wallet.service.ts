@@ -105,7 +105,11 @@ export class WalletService {
         fiat_amount: 0,
         fiat_currency: 'ngn',
         token: payload.data.asset.symbol,
-        chain: payload.data.asset.standard || "BEP",
+        chain: payload.data.asset.standard || "base",
+        token_logo: payload.data.asset.logoUrl,
+        gatewayTxId: payload.data.hash,
+        metadata: payload.data.metadata,
+        type: "DEPOSIT",
         // status: 
         txHash: payload.data.blockHash,
         senderAddress: payload.data.senderAddress,
