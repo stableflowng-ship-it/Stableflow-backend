@@ -21,33 +21,124 @@ export type CreateWallet = {
 export type CoinType = 'usdc' | 'usdt'
 export type CoinNetwork = 'bep20'
 
-export type WebhookPayload = {
-  id?: string;
-  event?: string;
-  data?: {
-    id?: string;
-    reference: string
-    event?: string;
-    event_type?: string;
-    eventType?: string;
-    recipientAddress?: string;
-    senderAddress?: string;
-    amount?: string;
-    type: string
-    asset?: {
-      symbol?: string;
-      name: string
+export interface WebhookPayload {
+  event: string;
+  data: {
+    id: string;
+    reference: string;
+    senderAddress: string;
+    recipientAddress: string;
+    amount: string;
+    amountPaid: string;
+    fee: string | null;
+    currency: string;
+    blockNumber: number;
+    blockHash: string;
+    hash: string;
+    confirmations: number;
+    confirmed: boolean;
+    gasPrice: string;
+    gasUsed: string;
+    gasFee: string;
+    status: "SUCCESS" | "FAILED" | "PENDING";
+    type: "DEPOSIT" | "WITHDRAWAL";
+    note: string | null;
+    amlScreening: {
+      provider: string;
+      status: string;
+      message: string;
+    };
+    assetSwept: string | null;
+    assetSweptAt: string | null;
+    assetSweptGasFee: string | null;
+    assetSweptHash: string | null;
+    assetSweptSenderAddress: string | null;
+    assetSweptRecipientAddress: string | null;
+    assetSweptAmount: string | null;
+    reason: string | null;
+    network: string;
+    chainId: number;
+    metadata: {
+      user_id: number;
+      [key: string]: any;
+    };
+    createdAt: string;
+    updatedAt: string;
+    asset: {
+      id: string;
+      name: string;
+      symbol: string;
+      decimals: number;
+      address: string;
+      standard: string;
+      isActive: boolean;
+      logoUrl: string;
+      network: string;
+      createdAt: string;
+      updatedAt: string;
     };
     address: {
-      id: string,
-      address: string
-      [key: string]: any;
-    }
-    currency?: string;
-    [key: string]: any;
+      id: string;
+      address: string;
+      name: string;
+      isActive: boolean;
+      type: string;
+      derivationPath: string;
+      metadata: {
+        user_id: number;
+        [key: string]: any;
+      };
+      configurations: {
+        aml: {
+          status: string;
+          message: string;
+          provider: string;
+        };
+        showPrivateKey: boolean;
+        disableAutoSweep: boolean;
+        enableGaslessWithdraw: boolean;
+      };
+      network: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+    blockchain: {
+      id: string;
+      name: string;
+      symbol: string;
+      slug: string;
+      derivationPath: string;
+      isEvmCompatible: boolean;
+      logoUrl: string;
+      isActive: boolean;
+      tokenStandard: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+    wallet: {
+      id: string;
+      name: string;
+      description: string;
+      address: string;
+      derivationPath: string;
+      isActive: boolean;
+      status: string;
+      network: string;
+      createdAt: string;
+      updatedAt: string;
+      business: {
+        id: string;
+        name: string;
+        sector: string;
+        status: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+    beneficiary: string | null;
   };
-  [key: string]: any;
 }
+
 
 export type GetRate = {
   token: string
