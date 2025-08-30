@@ -88,7 +88,7 @@ export class WalletService {
   }
 
   static webhookBlockradar = async (payload: WebhookPayload) => {
-
+    console.log('payload', payload)
     const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address }).getOne()
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
 
