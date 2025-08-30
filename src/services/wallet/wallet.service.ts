@@ -58,8 +58,6 @@ export class WalletService {
     })
     const text: any = await body.json();
     const response = text.data;
-    console.log(response)
-    // const response = { data: { id: "addr_123456", address: "0x1234567890abcdef" } }
     const newWallet = walletRepo.create({
       address_id: response?.id,
       wallet_address: response?.address,
@@ -90,11 +88,12 @@ export class WalletService {
   }
 
   static webhookBlockradar = async (payload: WebhookPayload) => {
-    console.log(payload)
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId', { addressId: payload.data.address.id }).getOne()
+
+    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address }).getOne()
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
 
-    if (payload.event === "deposit.success") {
+    if (payload.event === "deposit.success" && wallet && business) {
+      console.log('data', payload)
       const newTrans = transRepo.create({
         transaction_id: payload.data.id,
         business_id: business.id,
@@ -118,7 +117,11 @@ export class WalletService {
       wallet.amount = wallet.amount + parseFloat(payload.data.amount)
       await walletRepo.save(wallet)
 
+    } else {
+      throw new HttpException(400, 'Wallet or Business not found')
     }
+
+    return 'Webhook received'
   }
 
   static getRatePaycrest = async (payload: GetRate) => {
