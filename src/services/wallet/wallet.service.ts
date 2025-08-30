@@ -89,7 +89,8 @@ export class WalletService {
 
   static webhookBlockradar = async (payload: WebhookPayload) => {
     console.log('payload', payload)
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address }).getOne()
+    // const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id = :addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address }).getOne()
+    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.wallet_address =:address', { addressId: payload.data.recipientAddress, address: payload.data.address }).getOne()
     const business = await busiRepo.createQueryBuilder('business').where('business.id =:id', { id: wallet.business_id }).getOne()
 
     if (payload.event === "deposit.success" && wallet && business) {
@@ -101,9 +102,9 @@ export class WalletService {
         fiat_amount: 0,
         fiat_currency: 'ngn',
         token: payload.data.asset.symbol,
-        chain: payload.data.asset['standard'],
+        chain: payload.data.asset.standard,
         // status: 
-        txHash: payload.data['blockHash'],
+        txHash: payload.data.blockHash,
         senderAddress: payload.data.senderAddress,
         businessAddress: wallet.wallet_address,
         address_id: wallet.address_id,
