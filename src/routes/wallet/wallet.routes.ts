@@ -1,7 +1,7 @@
 // 
 
 import { FastifyPluginAsync } from "fastify";
-import { blockRadarWebhook, generateWallet, getBusinessWallets } from "../../schemas/wallet/wallet.schema";
+import { blockRadarWebhook, generateWallet, getBusinessWallets, getRatePaycrest } from "../../schemas/wallet/wallet.schema";
 
 const userRoutes: FastifyPluginAsync = async (fastify) => {
   //post urls
@@ -9,6 +9,7 @@ const userRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.post('/webhook-blockradar', blockRadarWebhook)
   //get urls
   fastify.get('/get/:businessId', getBusinessWallets)
+  fastify.get('/rates', getRatePaycrest)
 };
 
 export default userRoutes;

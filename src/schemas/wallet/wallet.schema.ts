@@ -4,12 +4,21 @@ import { WalletControllers } from "../../controllers/wallet/wallet.controller";
 import { Static, Type as T } from "@sinclair/typebox";
 import { isAuth } from "../../utils/middleware";
 import { successDataSchema } from "../../utils/response.helper";
+import { object } from "zod";
 
 export const CoinType = T.Union([
   T.Literal('usdc'),
   T.Literal('usdt'),
 ])
 export const CoinNetwork = T.Literal('bep20')
+
+const RateSchema = T.Object({
+  token: T.String(),
+  amount: T.Number(),
+  currency: T.String(),
+  network: T.String()
+})
+
 
 export type CoinTypeType = Static<typeof CoinType>
 
@@ -68,4 +77,20 @@ export const blockRadarWebhook = {
   },
   // preHandler: isAuth,
   handler: WalletControllers.webhookBlockradar
-} 
+}
+
+export const getRatePaycrest = {
+  schema: {
+    tags: ['Wallet'],
+    summary: "Blockradar webhook",
+    query: RateSchema,
+    response: {
+      200: {
+        description: "Fecth rate from blockradar",
+        type: "object",
+        ...successDataSchema
+      }
+    }
+  },
+  handler: WalletControllers.getRatePaycrest
+}
