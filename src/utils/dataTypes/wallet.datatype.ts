@@ -228,3 +228,15 @@ export type GetRate = {
   currency: string
   network: string
 }
+
+export type CreateOrder = {
+  amount: number,
+  token: string,
+  network: string
+  bankName: string,
+  accountNumber: string,
+  accountName: string
+  returnAddress: string
+  rate?: string
+  reference: string
+}

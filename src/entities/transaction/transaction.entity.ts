@@ -40,6 +40,9 @@ export class Transaction {
   @Index()
   transaction_id: string;
 
+  @Column()
+  reference: string
+
   @Column({ nullable: false })
   business_id: string;
 

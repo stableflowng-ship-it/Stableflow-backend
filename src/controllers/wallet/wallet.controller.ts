@@ -48,7 +48,6 @@ export class WalletControllers {
     } catch (e: unknown) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
-      console.log(errorMessage)
       reply.code(400).send(error)
     }
   }
@@ -61,8 +60,35 @@ export class WalletControllers {
     } catch (e) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
-      console.log(errorMessage)
       reply.code(400).send(error)
     }
   }
+
+  static webhookPaycrest = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const signature = req.headers['x-paycrest-signature'] as string | undefined;
+      if (!signature) throw new HttpException(401, 'Not authentication')
+      if (!verifyPaycrestSignature(req.body, signature, process.env.API_SECRET!)) {
+        return reply.status(401).send("Invalid signature");
+      }
+    } catch (e) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
+}
+
+
+function verifyPaycrestSignature(requestBody, signatureHeader, secretKey) {
+  const calculatedSignature = calculateHmacSignature(requestBody, secretKey);
+  return signatureHeader === calculatedSignature;
+}
+
+function calculateHmacSignature(data, secretKey) {
+  const crypto = require('crypto');
+  const key = Buffer.from(secretKey);
+  const hash = crypto.createHmac("sha256", key);
+  hash.update(data);
+  return hash.digest("hex");
 }
