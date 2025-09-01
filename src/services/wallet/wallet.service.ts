@@ -85,46 +85,52 @@ export class WalletService {
 
   //webhook for blockradar
   static webhookBlockradar = async (payload: WebhookPayload) => {
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
-    const business = await busiRepo.createQueryBuilder('business').leftJoinAndSelect('business.bankDetails', 'bank').where('business.id =:id', { id: wallet.business_id }).getOne()
-    const user = await userRepo.findOneBy({ id: business.owner_id })
-    if (payload.event === "deposit.success" && wallet && business) {
-      const newTrans = transRepo.create({
-        transaction_id: payload.data.id,
-        business_id: business.id,
-        token_amount: parseFloat(payload.data.amount),
-        fiat_amount: 0,
-        fiat_currency: 'ngn',
-        token: payload.data.asset.symbol,
-        chain: payload.data.asset.standard || "base",
-        token_logo: payload.data.asset.logoUrl,
-        gatewayTxId: payload.data.hash,
-        metadata: payload.data.metadata,
-        type: "DEPOSIT",
-        txHash: payload.data.blockHash,
-        senderAddress: payload.data.senderAddress,
-        businessAddress: wallet.wallet_address,
-        address_id: wallet.address_id,
-        wallet_id: wallet.id,
-        exchange_rate: 0,
-        business: business,
-        reference: payload.data.reference
-      })
-      const transaction = await transRepo.save(newTrans)
-      wallet.amount = wallet.amount + parseFloat(payload.data.amount)
-      await walletRepo.save(wallet)
 
-      if (business.auto_offramp) {
-        const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-        await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
-        transaction.status = "PROCESSING"
-        await transRepo.save(transaction)
+    if (payload.event === "deposit.success") {
+      const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
+      const business = await busiRepo.createQueryBuilder('business').leftJoinAndSelect('business.bankDetails', 'bank').where('business.id =:id', { id: wallet.business_id }).getOne()
+      const user = await userRepo.findOneBy({ id: business.owner_id })
+      if (payload.event === "deposit.success" && wallet && business) {
+        const newTrans = transRepo.create({
+          transaction_id: payload.data.id,
+          business_id: business.id,
+          token_amount: parseFloat(payload.data.amount),
+          fiat_amount: 0,
+          fiat_currency: 'ngn',
+          token: payload.data.asset.symbol,
+          chain: payload.data.asset.standard || "base",
+          token_logo: payload.data.asset.logoUrl,
+          gatewayTxId: payload.data.hash,
+          metadata: payload.data.metadata,
+          type: "DEPOSIT",
+          txHash: payload.data.blockHash,
+          senderAddress: payload.data.senderAddress,
+          businessAddress: wallet.wallet_address,
+          address_id: wallet.address_id,
+          wallet_id: wallet.id,
+          exchange_rate: 0,
+          business: business,
+          reference: payload.data.reference
+        })
+        const transaction = await transRepo.save(newTrans)
+        wallet.amount = wallet.amount + parseFloat(payload.data.amount)
+        await walletRepo.save(wallet)
+
+        if (business.auto_offramp) {
+          console.log('Transaction saved')
+          const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
+          console.log('order created', order)
+          await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+          console.log('Withdrawal')
+          transaction.status = "PROCESSING"
+          await transRepo.save(transaction)
+        }
       }
-    } else if (payload.event === "withdraw.success") {
+      else {
+        throw new HttpException(400, 'Wallet or Business not found')
+      }
     }
-    else {
-      throw new HttpException(400, 'Wallet or Business not found')
-    }
+
     return 'Webhook received'
   }
 
@@ -145,12 +151,12 @@ export class WalletService {
 
   // create order on paycrest
   static createOrderPaycrest = async (payload: CreateOrder) => {
-    const rate = this.getRatePaycrest({ token: payload.token, amount: payload.amount, currency: "NGN", network: payload.network })
+    const rate = await this.getRatePaycrest({ token: payload.token, amount: payload.amount, currency: "NGN", network: payload.network })
     const orderData = {
       amount: payload.amount,
       token: payload.token,
       network: payload.network,
-      rate: parseFloat(payload.rate),
+      rate: rate.rate,
       recipient: {
         institution: payload.bankName,
         accountIdentifier: payload.accountNumber,
@@ -179,7 +185,6 @@ export class WalletService {
   static withdrawBlockradar = async (payload: WithdrawalType, user: User) => {
     // const business = await busiRepo.createQueryBuilder('busi').where('busi.owner_id =:ownerId', { ownerId: user.id }).getOne()
     // const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id =:businessId', { businessId: business.id }).getOne()
-
     const walletId = envHelper.block_radar.wallet_id
     const headers = {
       "x-api-key": apiKey,
@@ -203,15 +208,12 @@ export class WalletService {
       headers: headers,
       body: JSON.stringify(body)
     };
-
-
     const response = await fetch(url, options);
     const data: any = await response.json();
 
     if (data.statusCode !== 200) {
       throw new HttpException(400, data.message)
     }
-
     return { message: 'Withdrawal request initiated initiated', data: data }
   }
 
