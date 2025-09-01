@@ -40,7 +40,7 @@ export class Transaction {
   @Index()
   transaction_id: string;
 
-  @Column()
+  @Column({ nullable: true }) // remove the nullable in new db
   reference: string
 
   @Column({ nullable: false })
