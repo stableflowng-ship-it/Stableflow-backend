@@ -71,7 +71,7 @@ export const blockRadarWebhook = {
   schema: {
     tags: ["Wallet"],
     summary: 'Blockradar webhook',
-    body: T.Object({}),
+    body: T.Object(T.Any()),
     response: {
       200: {
         description: 'Blockradar webhook',
