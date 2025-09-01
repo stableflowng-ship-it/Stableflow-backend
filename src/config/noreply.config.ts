@@ -15,16 +15,13 @@ type EmailType = {
 }
 
 
-export const sendEmail = ({ to, subject, html, htmlPath, htmlTemplate }: EmailType) => {
+export const sendEmail = ({ to, subject, html, htmlPath }: EmailType) => {
   let template: HandlebarsTemplateDelegate
-  if (htmlPath) {
-    const templatePath = path.join(__dirname, htmlPath)
-    const templateSource = fs.readFileSync(templatePath, 'utf8')
-    template = Handlebars.compile(templateSource)
-  } else if (htmlTemplate) {
-    template = Handlebars.compile(JSON.parse(htmlTemplate))
-  }
-  // console.log('-----------------', `${from ?? 'Swifo'} ${envHelper.postmark.od_email}`)
+
+  const templatePath = path.join(__dirname, htmlPath)
+  const templateSource = fs.readFileSync(templatePath, 'utf8')
+  template = Handlebars.compile(templateSource)
+
   const mailOptions = {
     from: `Stableflow ${envHelper.email.email}`,
     to: to,
@@ -34,8 +31,8 @@ export const sendEmail = ({ to, subject, html, htmlPath, htmlTemplate }: EmailTy
 
   const transporter = nodemailer.createTransport({
     host: envHelper.email.host,
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
     auth: {
       user: envHelper.email.username,
       pass: envHelper.email.password
