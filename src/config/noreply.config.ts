@@ -43,4 +43,3 @@ export const sendEmail = ({ to, subject, html, htmlPath, htmlTemplate }: EmailTy
   })
   return transporter.sendMail(mailOptions)
 }
-
