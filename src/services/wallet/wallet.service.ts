@@ -87,8 +87,9 @@ export class WalletService {
   static webhookBlockradar = async (payload: WebhookPayload) => {
     const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
     const business = await busiRepo.createQueryBuilder('business').leftJoinAndSelect('busi.bankDetails', 'bank').where('business.id =:id', { id: wallet.business_id }).getOne()
-    const user = await userRepo.findOneBy({ id: business.owner_id })
+    // const user = await userRepo.findOneBy({ id: business.owner_id })
 
+    console.log('first', payload.data.reference)
     if (payload.event === "deposit.success" && wallet && business) {
       const newTrans = transRepo.create({
         transaction_id: payload.data.id,
@@ -114,13 +115,14 @@ export class WalletService {
       const transaction = await transRepo.save(newTrans)
       wallet.amount = wallet.amount + parseFloat(payload.data.amount)
       await walletRepo.save(wallet)
+      console.log('second', payload.data.reference)
 
-      if (business.auto_offramp) {
-        const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-        await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
-        transaction.status = "PROCESSING"
-        await transRepo.save(transaction)
-      }
+      // if (business.auto_offramp) {
+      //   const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
+      //   await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+      //   transaction.status = "PROCESSING"
+      //   await transRepo.save(transaction)
+      // }
     } else if (payload.event === "withdraw.success") {
     }
     else {
