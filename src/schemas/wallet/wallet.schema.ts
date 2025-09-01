@@ -10,7 +10,7 @@ export const CoinType = T.Union([
   T.Literal('usdc'),
   T.Literal('usdt'),
 ])
-export const CoinNetwork = T.Literal('bep20')
+export const CoinNetwork = T.Union([T.Literal('bep20'), T.Literal('tron')])
 
 const RateSchema = T.Object({
   token: T.String(),
