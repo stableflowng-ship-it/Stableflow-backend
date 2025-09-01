@@ -7,7 +7,6 @@ import { BankDetails } from "../../entities/business/bank-details.entity";
 import { Business } from "../../entities/business/business.entity";
 import { User } from "../../entities/user/user.entities";
 import { BankType } from "../../utils/dataTypes/bank.datatype";
-import { request } from 'undici'
 
 
 const busiRepo = AppDataSource.getRepository(Business)
