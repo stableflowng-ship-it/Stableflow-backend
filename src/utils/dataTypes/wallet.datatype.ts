@@ -244,3 +244,8 @@ export type CreateOrder = {
 export type WebhookPaycrest = {
 
 }
+
+export type WithdrawalType = {
+  amount: number,
+  address: string
+}

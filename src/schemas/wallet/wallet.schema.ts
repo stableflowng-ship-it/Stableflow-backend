@@ -19,6 +19,11 @@ const RateSchema = T.Object({
   network: T.String()
 })
 
+const withdrawalSch = T.Object({
+  amount: T.Number(),
+  address: T.String()
+})
+
 
 export type CoinTypeType = Static<typeof CoinType>
 
@@ -109,4 +114,20 @@ export const paycrestHookOpts = {
     }
   },
   handler: WalletControllers.webhookPaycrest
+}
+
+export const withdrawal = {
+  schema: {
+    tags: ['Wallet'],
+    summary: "Withdrawal from wallet",
+    body: withdrawalSch,
+    response: {
+      200: {
+        description: "Withdrawal from wallet",
+        type: "object",
+        ...successDataSchema
+      }
+    }
+  },
+  handler: WalletControllers.withdrawBlockradar
 }

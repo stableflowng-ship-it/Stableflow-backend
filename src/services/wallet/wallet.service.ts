@@ -8,7 +8,7 @@ import { Business, OnboardingStep } from "../../entities/business/business.entit
 import { Wallet } from "../../entities/business/wallet.entity"
 import { Transaction } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
-import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse } from "../../utils/dataTypes/wallet.datatype"
+import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse, WithdrawalType } from "../../utils/dataTypes/wallet.datatype"
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
@@ -21,6 +21,18 @@ const b_baseUrl = "https://api.blockradar.co/v1/wallets"
 const p_baseUrl = "https://api.paycrest.io/v1"
 
 export class WalletService {
+  //get business wallet
+  static getBusinessWallets = async (businessId: string, user: User) => {
+    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).getOne()
+    if (!business) {
+      throw new HttpException(400, "Business doesn't exist")
+    }
+    if (business.owner_id !== user.id) {
+      throw new HttpException(403, 'Forbidden')
+    }
+    const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getOne()
+    return { data: wallets, message: '' }
+  }
 
   //generate wallet from blockradar
   static generateWalletAddress = async (params: CreateWallet) => {
@@ -71,19 +83,6 @@ export class WalletService {
     return { message: `${params.coinNetwork} ${params.coinType} wallet created for business`, data: response }
   }
 
-  //get business wallet
-  static getBusinessWallets = async (businessId: string, user: User) => {
-    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).getOne()
-    if (!business) {
-      throw new HttpException(400, "Business doesn't exist")
-    }
-    if (business.owner_id !== user.id) {
-      throw new HttpException(403, 'Forbidden')
-    }
-    const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getOne()
-    return { data: wallets, message: '' }
-  }
-
   //webhook for blockradar
   static webhookBlockradar = async (payload: WebhookPayload) => {
     const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
@@ -116,18 +115,14 @@ export class WalletService {
       wallet.amount = wallet.amount + parseFloat(payload.data.amount)
       await walletRepo.save(wallet)
 
-      if (business.auto_offramp) {
-        const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-        await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
-        transaction.status = "PROCESSING"
-        await transRepo.save(transaction)
-      }
-
-
+      // if (business.auto_offramp) {
+      //   const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
+      //   await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+      //   transaction.status = "PROCESSING"
+      //   await transRepo.save(transaction)
+      // }
     } else if (payload.event === "withdraw.success") {
-
     }
-
     else {
       throw new HttpException(400, 'Wallet or Business not found')
     }
@@ -202,37 +197,38 @@ export class WalletService {
     if (!response.ok) {
       throw new HttpException(400, 'Something went wrong')
     }
-    const data: any = await response.json()
-    if (!business.auto_offramp) {
-      const newTrans = transRepo.create({
-        transaction_id: data.data.id,
-        business_id: business.id,
-        token_amount: parseFloat(data.data.amount),
-        fiat_amount: 0,
-        fiat_currency: 'ngn',
-        token: data.data.asset.symbol,
-        chain: data.data.asset.standard || "base",
-        token_logo: data.data.asset.logoUrl,
-        gatewayTxId: data.data.hash,
-        metadata: data.data.metadata,
-        type: "WITHDRAWAL",
-        txHash: data.data.blockHash,
-        senderAddress: data.data.senderAddress,
-        businessAddress: wallet.wallet_address,
-        address_id: wallet.address_id,
-        wallet_id: wallet.id,
-        exchange_rate: 0,
-        business: business
-      })
-      await transRepo.save(newTrans)
-    }
+    const res = await response.json()
+    // const data: any = await response.json()
+    // if (!business.auto_offramp) {
+    //   const newTrans = transRepo.create({
+    //     transaction_id: data.data.id,
+    //     business_id: business.id,
+    //     token_amount: parseFloat(data.data.amount),
+    //     fiat_amount: 0,
+    //     fiat_currency: 'ngn',
+    //     token: data.data.asset.symbol,
+    //     chain: data.data.asset.standard || "base",
+    //     token_logo: data.data.asset.logoUrl,
+    //     gatewayTxId: data.data.hash,
+    //     metadata: data.data.metadata,
+    //     type: "WITHDRAWAL",
+    //     txHash: data.data.blockHash,
+    //     senderAddress: data.data.senderAddress,
+    //     businessAddress: wallet.wallet_address,
+    //     address_id: wallet.address_id,
+    //     wallet_id: wallet.id,
+    //     exchange_rate: 0,
+    //     business: business
+    //   })
+    //   await transRepo.save(newTrans)
+    // }
 
-    return 'Withdrawal initiated'
+    return { message: 'Withdrawal initiated', data: res }
   }
 
   //webhook for paycrest
   // Server setup and webhook endpoint
-  static webhookPaycrest = (payload: WebhookPaycrest) => {
+  static webhookPaycrest = (payload) => {
     console.log(payload)
     return payload
   }
@@ -242,10 +238,7 @@ export class WalletService {
 
 
 
-type WithdrawalType = {
-  amount: number,
-  address: string
-}
+
 
 const data = {
   "address": "0x2DC6836e58697Bf4Afd9BbA4C2330E1032cc9618",
