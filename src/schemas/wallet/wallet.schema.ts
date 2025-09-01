@@ -94,3 +94,19 @@ export const getRatePaycrest = {
   },
   handler: WalletControllers.getRatePaycrest
 }
+
+export const paycrestHookOpts = {
+  schema: {
+    tags: ['Wallet'],
+    summary: "Paycrest webhook",
+    body: T.Object(T.Any()),
+    response: {
+      200: {
+        description: "Fecth rate from blockradar",
+        type: "object",
+        ...successDataSchema
+      }
+    }
+  },
+  handler: WalletControllers.webhookPaycrest
+}

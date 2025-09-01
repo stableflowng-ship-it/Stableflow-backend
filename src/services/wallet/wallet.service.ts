@@ -8,7 +8,7 @@ import { Business, OnboardingStep } from "../../entities/business/business.entit
 import { Wallet } from "../../entities/business/wallet.entity"
 import { Transaction } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
-import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPayload, WithdrawalResponse } from "../../utils/dataTypes/wallet.datatype"
+import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse } from "../../utils/dataTypes/wallet.datatype"
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
@@ -232,7 +232,9 @@ export class WalletService {
 
   //webhook for paycrest
   // Server setup and webhook endpoint
-  static webhookPaycrest = () => {
+  static webhookPaycrest = (payload: WebhookPaycrest) => {
+    console.log(payload)
+    return payload
   }
 }
 
