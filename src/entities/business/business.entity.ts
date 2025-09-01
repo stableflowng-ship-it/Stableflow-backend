@@ -42,6 +42,9 @@ export class Business {
   })
   onboarding_step: OnboardingStep;
 
+  @Column({ default: true })
+  auto_offramp: boolean
+
   // Category relationship
   // @ManyToOne(() => Category, (category) => category.businesses, {
   //   nullable: true,

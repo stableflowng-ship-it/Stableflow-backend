@@ -140,9 +140,103 @@ export interface WebhookPayload {
 }
 
 
+export interface WithdrawalResponse {
+  amlScreening: any | null;
+  amount: string;
+  amountPaid: string;
+  asset: {
+    address: string;
+    blockchain: {
+      createdAt: string;
+      derivationPath: string;
+      id: string;
+      isActive: boolean;
+      isEvmCompatible: boolean;
+      logoUrl: string;
+      name: string;
+      slug: string;
+      symbol: string;
+      tokenStandard: string;
+      updatedAt: string;
+    };
+    createdAt: string;
+    decimals: number;
+    id: string;
+    isActive: boolean;
+    logoUrl: string;
+    name: string;
+    network: string;
+    standard: string;
+    symbol: string;
+    updatedAt: string;
+  };
+  assetSwept: any | null;
+  assetSweptAmount: string | null;
+  assetSweptAt: string | null;
+  assetSweptGasFee: string | null;
+  assetSweptHash: string | null;
+  assetSweptRecipientAddress: string | null;
+  assetSweptResponse: any | null;
+  assetSweptSenderAddress: string | null;
+  blockHash: string | null;
+  blockNumber: string | null;
+  blockchain: {
+    createdAt: string;
+    derivationPath: string;
+    id: string;
+    isActive: boolean;
+    isEvmCompatible: boolean;
+    logoUrl: string;
+    name: string;
+    slug: string;
+    symbol: string;
+    tokenStandard: string;
+    updatedAt: string;
+  };
+  chainId: string | null;
+  confirmations: number | null;
+  confirmed: boolean;
+  createdAt: string;
+  currency: string;
+  fee: string | null;
+  feeMetadata: any | null;
+  gasFee: string | null;
+  gasPrice: string | null;
+  gasUsed: string | null;
+  hash: string;
+  id: string;
+  metadata: any | null;
+  network: string;
+  note: string | null;
+  reason: string | null;
+  recipientAddress: string;
+  senderAddress: string;
+  status: string;
+  tokenAddress: string | null;
+  type: string;
+  updatedAt: string;
+  wallet: {
+    id: string;
+  };
+}
+
+
+
 export type GetRate = {
   token: string
   amount: number
   currency: string
   network: string
+}
+
+export type CreateOrder = {
+  amount: number,
+  token: string,
+  network: string
+  bankName: string,
+  accountNumber: string,
+  accountName: string
+  returnAddress: string
+  rate?: string
+  reference: string
 }

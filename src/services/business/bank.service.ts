@@ -32,15 +32,12 @@ export class BankService {
     newBank.business = business
 
     await bankRepo.save(newBank)
-
     return 'Business bank created'
   }
 
 
   static fecthBanks = async () => {
-
     const response = await fetch(`${paystack}bank?country=nigeria`, { method: 'GET', headers: { 'content-type': 'application/json' } })
-
     if (!response.ok) {
       throw new HttpException(400, 'Unable to fetch banks')
     }
@@ -50,7 +47,6 @@ export class BankService {
 
   static verifyBank = async (payload: { accountNumber: string, bankCode: string }) => {
     const verifyUrl = `${paystack}bank/resolve?account_number=${payload.accountNumber}&bank_code=${payload.bankCode}`
-
     const response = await fetch(verifyUrl, {
       method: 'GET',
       headers: { 'content-type': 'application/json', Authorization: `Bearer ${envHelper.paystack.secret_key}`, }

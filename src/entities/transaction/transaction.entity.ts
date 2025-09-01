@@ -22,14 +22,26 @@ export enum TransactionStatus {
   REFUNDED = "REFUNDED", // Transaction was refunded
 }
 
+export enum TransactionType {
+  DEPOSIT = "DEPOSIT",
+  WITHDRAWAL = "WITHDRAWAL",
+  OFFRAMP = "OFFRAMP",
+}
+
 @Entity({ name: "transactions" })
 export class Transaction {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column()
+  type: 'DEPOSIT' | 'WITHDRAWAL' | 'OFFRAMP';
+
   @Column({ nullable: false, unique: true })
   @Index()
   transaction_id: string;
+
+  @Column()
+  reference: string
 
   @Column({ nullable: false })
   business_id: string;
@@ -46,6 +58,9 @@ export class Transaction {
   @Column()
   token: string;
 
+  @Column()
+  token_logo: string;
+
   @Column({ nullable: false })
   chain: string;
 
@@ -53,7 +68,7 @@ export class Transaction {
     type: "varchar",
     default: TransactionStatus.UNSETTLED,
   })
-  status: string; // Using string type for status
+  status: string;
 
   @Column({ nullable: true })
   txHash: string;

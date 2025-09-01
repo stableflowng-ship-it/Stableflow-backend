@@ -29,6 +29,9 @@ export class Wallet {
   @Column({ length: 36, unique: true })
   address_id: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  blockchain: any
+
   @ManyToOne(() => Business)
   business: Business
 
