@@ -87,6 +87,9 @@ export class WalletService {
   static webhookBlockradar = async (payload: WebhookPayload) => {
 
     if (payload.event === "deposit.success") {
+      const transaction = await transRepo.findOneBy({ transaction_id: payload.data.id })
+      if (transaction) return 'Transation already created'
+
       const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
       const business = await busiRepo.createQueryBuilder('business').leftJoinAndSelect('business.bankDetails', 'bank').where('business.id =:id', { id: wallet.business_id }).getOne()
       const user = await userRepo.findOneBy({ id: business.owner_id })
@@ -145,18 +148,19 @@ export class WalletService {
     }
     const rateData: any = await response.json();
 
-    // const order = await this.createOrderPaycrest({ accountName: 'Pelumi Olufemi', accountNumber: '9053489201', amount: 10, bankName: 'OPAYNGPC', network: 'base', returnAddress: '0x2DC6836e58697Bf4Afd9BbA4C2330E1032cc9618', token: 'USDC', rate: rateData.data, reference: '' })
+    // const order = await this.createOrderPaycrest({ accountName: 'Pelumi Olufemi', accountNumber: '9053489201', amount: 5, bankName: 'OPAYNGPC', network: 'base', returnAddress: '0x2DC6836e58697Bf4Afd9BbA4C2330E1032cc9618', token: 'USDC', rate: rateData.data, reference: 'dfhhahs' })
     return { rate: rateData.data };
   }
 
   // create order on paycrest
   static createOrderPaycrest = async (payload: CreateOrder) => {
-    const rate = await this.getRatePaycrest({ token: payload.token, amount: payload.amount, currency: "NGN", network: payload.network })
+    const { rate } = await this.getRatePaycrest({ token: payload.token, amount: payload.amount, currency: "NGN", network: payload.network })
     const orderData = {
       amount: payload.amount,
       token: payload.token,
       network: payload.network,
-      rate: rate.rate,
+      rate: rate,
+      // rate: payload.rate,
       recipient: {
         institution: payload.bankName,
         accountIdentifier: payload.accountNumber,
@@ -174,7 +178,6 @@ export class WalletService {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(orderData)
-      // body: JSON.stringify(orderData)
     });
     const order = await response.json()
     console.log(order)
@@ -195,6 +198,7 @@ export class WalletService {
       throw new HttpException(400, asset.statusText)
     }
     const asset_res: any = await asset.json()
+    console.log('from asset res', asset_res.data[0].id)
     const body = {
       assets: [{
         id: asset_res.data[0].id,

@@ -61,7 +61,6 @@ export class WalletControllers {
     } catch (e: unknown) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
-      console.log('error', error)
       reply.code(400).send(error)
     }
   }
@@ -87,7 +86,7 @@ export class WalletControllers {
       }
       const response = await WalletService.webhookPaycrest(req.body)
       const data = { ...successData, data: response, message: 'Paycrest webhook' }
-      reply.code(200).send()
+      reply.code(200).send(data)
     } catch (e) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
