@@ -34,8 +34,8 @@ export const sendEmail = ({ to, subject, html, htmlPath, htmlTemplate }: EmailTy
 
   const transporter = nodemailer.createTransport({
     host: envHelper.email.host,
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
     auth: {
       user: envHelper.email.username,
       pass: envHelper.email.password
