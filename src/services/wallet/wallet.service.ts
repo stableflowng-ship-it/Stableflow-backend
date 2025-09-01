@@ -178,8 +178,8 @@ export class WalletService {
 
   //withdrawal on blockradar
   static withdrawBlockradar = async (payload: WithdrawalType, user: User) => {
-    const business = await busiRepo.createQueryBuilder('busi').where('busi.owner_id =:ownerId', { ownerId: user.id }).getOne()
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id =:businessId', { businessId: business.id }).getOne()
+    // const business = await busiRepo.createQueryBuilder('busi').where('busi.owner_id =:ownerId', { ownerId: user.id }).getOne()
+    // const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id =:businessId', { businessId: business.id }).getOne()
 
     const walletId = envHelper.block_radar.wallet_id
     const headers = {
