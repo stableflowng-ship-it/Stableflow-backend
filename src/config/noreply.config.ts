@@ -5,6 +5,7 @@ import Handlebars from 'handlebars'
 import { envHelper } from './env.helper'
 const fs = require('fs')
 const path = require('path')
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 type EmailType = {
   to: string,
@@ -31,8 +32,8 @@ export const sendEmail = ({ to, subject, html, htmlPath }: EmailType) => {
 
   const transporter = nodemailer.createTransport({
     host: envHelper.email.host,
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
       user: envHelper.email.username,
       pass: envHelper.email.password
@@ -40,3 +41,5 @@ export const sendEmail = ({ to, subject, html, htmlPath }: EmailType) => {
   })
   return transporter.sendMail(mailOptions)
 }
+
+// export const ses

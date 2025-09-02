@@ -11,6 +11,7 @@ const bankSchema = T.Object({
   accountNumber: T.String(),
   accountName: T.String()
 })
+
 const verifySchema = T.Object({
   accountNumber: T.String(),
   bankCode: T.String()
@@ -45,22 +46,52 @@ export const fetchBanksOpts = {
       }
     }
   },
-  // preHandler: isAuth,
   handler: BankController.fecthBanks
 }
+
 export const verifyBank = {
   schema: {
     tags: ['Businesses'],
     summary: "Verify bank account",
     query: verifySchema,
     response: {
-      201: {
+      200: {
         description: 'Bank account',
         type: 'object',
         ...successDataSchema
       }
     }
   },
-  // preHandler: isAuth,
   handler: BankController.verifyBank
+}
+
+export const paycrestdBanks = {
+  schema: {
+    tags: ['Businesses'],
+    summary: "Get paycrest banks",
+    response: {
+      200: {
+        description: 'Banks',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  handler: BankController.fetchSupportedBank
+}
+
+export const verifyBankPaycrest = {
+  schema: {
+    tags: ['Businesses'],
+    summary: "Verify paycrest banks",
+    query: verifySchema,
+    response: {
+      200: {
+        description: 'Banks',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  handler: BankController.verifyBankPaycrest
 }

@@ -20,6 +20,7 @@ export enum TransactionStatus {
   SETTLED = "SETTLED", // Transaction successfully processed and settled
   FAILED = "FAILED", // Transaction processing failed
   REFUNDED = "REFUNDED", // Transaction was refunded
+  EXPIRED = "EXPIRED"
 }
 
 export enum TransactionType {

@@ -57,4 +57,33 @@ export class BankService {
     const data = await response.json()
     return data
   }
+
+  //for paycrest
+
+  static fetchSupportedBank = async () => {
+    const url = 'https://api.paycrest.io/v1/institutions/ngn'
+    const options = { method: 'GET' }
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new HttpException(400, response.statusText)
+    }
+    const data = await response.json();
+    return data
+  }
+
+  static verifyBankPaycrest = async (payload: { accountNumber: string, bankCode: string }) => {
+    const url = 'https://api.paycrest.io/v1/verify-account';
+    const body = {
+      institution: payload.bankCode,
+      accountIdentifier: payload.accountNumber
+    }
+    const options = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    };
+    const response = await fetch(url, options);
+    const data = await response.json();
+    return data
+  }
 }

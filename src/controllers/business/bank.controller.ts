@@ -42,4 +42,29 @@ export class BankController {
       reply.code(400).send(error)
     }
   }
+
+  // for paycrest
+  static fetchSupportedBank = async (_: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const response = await BankService.fetchSupportedBank()
+      const data = { ...successData, data: response, message: 'All banks supported by paycrest' }
+      reply.code(200).send(data)
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
+
+  static verifyBankPaycrest = async (req: FastifyRequest<{ Querystring: { accountNumber: string, bankCode: string } }>, reply: FastifyReply) => {
+    try {
+      const response = await BankService.verifyBankPaycrest(req.query)
+      const data = { ...successData, data: response, message: 'verify bank with paycrest' }
+      reply.code(200).send(data)
+    } catch (e) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
 }
