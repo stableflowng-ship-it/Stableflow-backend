@@ -19,6 +19,11 @@ const RateSchema = T.Object({
   network: T.String()
 })
 
+const withdrawalSch = T.Object({
+  amount: T.Number(),
+  address: T.String()
+})
+
 
 export type CoinTypeType = Static<typeof CoinType>
 
@@ -66,7 +71,7 @@ export const blockRadarWebhook = {
   schema: {
     tags: ["Wallet"],
     summary: 'Blockradar webhook',
-    body: T.Object({}),
+    body: T.Object(T.Any()),
     response: {
       200: {
         description: 'Blockradar webhook',
@@ -93,4 +98,37 @@ export const getRatePaycrest = {
     }
   },
   handler: WalletControllers.getRatePaycrest
+}
+
+export const paycrestHookOpts = {
+  schema: {
+    tags: ['Wallet'],
+    summary: "Paycrest webhook",
+    body: T.Object(T.Any()),
+    response: {
+      200: {
+        description: "Fecth rate from blockradar",
+        type: "object",
+        ...successDataSchema
+      }
+    }
+  },
+  handler: WalletControllers.webhookPaycrest
+}
+
+export const withdrawal = {
+  schema: {
+    tags: ['Wallet'],
+    summary: "Withdrawal from wallet",
+    body: withdrawalSch,
+    response: {
+      200: {
+        description: "Withdrawal from wallet",
+        type: "object",
+        ...successDataSchema
+      }
+    }
+  },
+  preHandler: isAuth,
+  handler: WalletControllers.withdrawBlockradar
 }

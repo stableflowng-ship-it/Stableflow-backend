@@ -5,6 +5,7 @@ import Handlebars from 'handlebars'
 import { envHelper } from './env.helper'
 const fs = require('fs')
 const path = require('path')
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 type EmailType = {
   to: string,
@@ -15,16 +16,13 @@ type EmailType = {
 }
 
 
-export const sendEmail = ({ to, subject, html, htmlPath, htmlTemplate }: EmailType) => {
+export const sendEmail = ({ to, subject, html, htmlPath }: EmailType) => {
   let template: HandlebarsTemplateDelegate
-  if (htmlPath) {
-    const templatePath = path.join(__dirname, htmlPath)
-    const templateSource = fs.readFileSync(templatePath, 'utf8')
-    template = Handlebars.compile(templateSource)
-  } else if (htmlTemplate) {
-    template = Handlebars.compile(JSON.parse(htmlTemplate))
-  }
-  // console.log('-----------------', `${from ?? 'Swifo'} ${envHelper.postmark.od_email}`)
+
+  const templatePath = path.join(__dirname, htmlPath)
+  const templateSource = fs.readFileSync(templatePath, 'utf8')
+  template = Handlebars.compile(templateSource)
+
   const mailOptions = {
     from: `Stableflow ${envHelper.email.email}`,
     to: to,
@@ -44,3 +42,4 @@ export const sendEmail = ({ to, subject, html, htmlPath, htmlTemplate }: EmailTy
   return transporter.sendMail(mailOptions)
 }
 
+// export const ses

@@ -7,7 +7,6 @@ import { BankDetails } from "../../entities/business/bank-details.entity";
 import { Business } from "../../entities/business/business.entity";
 import { User } from "../../entities/user/user.entities";
 import { BankType } from "../../utils/dataTypes/bank.datatype";
-import { request } from 'undici'
 
 
 const busiRepo = AppDataSource.getRepository(Business)
@@ -56,6 +55,35 @@ export class BankService {
       throw new HttpException(400, response.statusText || 'Unable to verify bank account')
     }
     const data = await response.json()
+    return data
+  }
+
+  //for paycrest
+
+  static fetchSupportedBank = async () => {
+    const url = 'https://api.paycrest.io/v1/institutions/ngn'
+    const options = { method: 'GET' }
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new HttpException(400, response.statusText)
+    }
+    const data = await response.json();
+    return data
+  }
+
+  static verifyBankPaycrest = async (payload: { accountNumber: string, bankCode: string }) => {
+    const url = 'https://api.paycrest.io/v1/verify-account';
+    const body = {
+      institution: payload.bankCode,
+      accountIdentifier: payload.accountNumber
+    }
+    const options = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    };
+    const response = await fetch(url, options);
+    const data = await response.json();
     return data
   }
 }

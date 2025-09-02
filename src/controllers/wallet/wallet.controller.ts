@@ -1,7 +1,7 @@
 // 
 
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateWallet, GetRate, WebhookPayload } from "../../utils/dataTypes/wallet.datatype";
+import { CreateWallet, GetRate, WebhookPaycrest, WebhookPayload, WithdrawalType } from "../../utils/dataTypes/wallet.datatype";
 import { WalletService } from "../../services/wallet/wallet.service";
 import { failureData, successData } from "../../utils/response.helper";
 import { createHmac } from "crypto";
@@ -32,6 +32,19 @@ export class WalletControllers {
     } catch (e: unknown) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
+
+  static withdrawBlockradar = async (req: FastifyRequest<{ Body: WithdrawalType }>, reply: FastifyReply) => {
+    try {
+      const response = await WalletService.withdrawBlockradar(req.body, req.user)
+      const data = { ...successData, data: response.data, message: response.message }
+      reply.code(200).send(data)
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      console.log('error', error)
       reply.code(400).send(error)
     }
   }
@@ -71,6 +84,9 @@ export class WalletControllers {
       if (!verifyPaycrestSignature(req.body, signature, process.env.API_SECRET!)) {
         return reply.status(401).send("Invalid signature");
       }
+      const response = await WalletService.webhookPaycrest(req.body)
+      const data = { ...successData, data: response, message: 'Paycrest webhook' }
+      reply.code(200).send(data)
     } catch (e) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }

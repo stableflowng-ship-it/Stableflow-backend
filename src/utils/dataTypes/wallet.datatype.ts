@@ -240,3 +240,12 @@ export type CreateOrder = {
   rate?: string
   reference: string
 }
+
+export type WebhookPaycrest = {
+
+}
+
+export type WithdrawalType = {
+  amount: number,
+  address: string
+}

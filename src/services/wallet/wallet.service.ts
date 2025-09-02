@@ -6,9 +6,9 @@ import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { Wallet } from "../../entities/business/wallet.entity"
-import { Transaction } from "../../entities/transaction/transaction.entity"
+import { Transaction, TransactionStatus } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
-import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPayload, WithdrawalResponse } from "../../utils/dataTypes/wallet.datatype"
+import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse, WithdrawalType } from "../../utils/dataTypes/wallet.datatype"
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
@@ -21,6 +21,18 @@ const b_baseUrl = "https://api.blockradar.co/v1/wallets"
 const p_baseUrl = "https://api.paycrest.io/v1"
 
 export class WalletService {
+  //get business wallet
+  static getBusinessWallets = async (businessId: string, user: User) => {
+    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).getOne()
+    if (!business) {
+      throw new HttpException(400, "Business doesn't exist")
+    }
+    if (business.owner_id !== user.id) {
+      throw new HttpException(403, 'Forbidden')
+    }
+    const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getOne()
+    return { data: wallets, message: '' }
+  }
 
   //generate wallet from blockradar
   static generateWalletAddress = async (params: CreateWallet) => {
@@ -71,66 +83,61 @@ export class WalletService {
     return { message: `${params.coinNetwork} ${params.coinType} wallet created for business`, data: response }
   }
 
-  //get business wallet
-  static getBusinessWallets = async (businessId: string, user: User) => {
-    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).getOne()
-    if (!business) {
-      throw new HttpException(400, "Business doesn't exist")
-    }
-    if (business.owner_id !== user.id) {
-      throw new HttpException(403, 'Forbidden')
-    }
-    const wallets = await walletRepo.createQueryBuilder('wallets').where('wallets.business_id = :businessId', { businessId }).getOne()
-    return { data: wallets, message: '' }
-  }
-
   //webhook for blockradar
   static webhookBlockradar = async (payload: WebhookPayload) => {
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
-    const business = await busiRepo.createQueryBuilder('business').leftJoinAndSelect('busi.bankDetails', 'bank').where('business.id =:id', { id: wallet.business_id }).getOne()
-    const user = await userRepo.findOneBy({ id: business.owner_id })
 
-    if (payload.event === "deposit.success" && wallet && business) {
-      const newTrans = transRepo.create({
-        transaction_id: payload.data.id,
-        business_id: business.id,
-        token_amount: parseFloat(payload.data.amount),
-        fiat_amount: 0,
-        fiat_currency: 'ngn',
-        token: payload.data.asset.symbol,
-        chain: payload.data.asset.standard || "base",
-        token_logo: payload.data.asset.logoUrl,
-        gatewayTxId: payload.data.hash,
-        metadata: payload.data.metadata,
-        type: "DEPOSIT",
-        txHash: payload.data.blockHash,
-        senderAddress: payload.data.senderAddress,
-        businessAddress: wallet.wallet_address,
-        address_id: wallet.address_id,
-        wallet_id: wallet.id,
-        exchange_rate: 0,
-        business: business,
-        reference: payload.data.reference
-      })
-      const transaction = await transRepo.save(newTrans)
-      wallet.amount = wallet.amount + parseFloat(payload.data.amount)
-      await walletRepo.save(wallet)
+    if (payload.event === "deposit.success") {
+      const transaction = await transRepo.findOneBy({ transaction_id: payload.data.id })
+      if (transaction) return 'Transation already created'
 
-      if (business.auto_offramp) {
-        const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankName, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-        await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
-        transaction.status = "PROCESSING"
-        await transRepo.save(transaction)
+      const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.address_id =:addressId AND wallet.wallet_address =:address', { addressId: payload.data.address.id, address: payload.data.address.address }).getOne()
+      const business = await busiRepo.createQueryBuilder('business').leftJoinAndSelect('business.bankDetails', 'bank').where('business.id =:id', { id: wallet.business_id }).getOne()
+      const user = await userRepo.findOneBy({ id: business.owner_id })
+      if (payload.event === "deposit.success" && wallet && business) {
+        const newTrans = transRepo.create({
+          transaction_id: payload.data.id,
+          business_id: business.id,
+          token_amount: parseFloat(payload.data.amount),
+          fiat_amount: 0,
+          fiat_currency: 'ngn',
+          token: payload.data.asset.symbol,
+          chain: payload.data.asset.standard || "base",
+          token_logo: payload.data.asset.logoUrl,
+          gatewayTxId: payload.data.hash,
+          metadata: payload.data.metadata,
+          type: "DEPOSIT",
+          txHash: payload.data.blockHash,
+          senderAddress: payload.data.senderAddress,
+          businessAddress: wallet.wallet_address,
+          address_id: wallet.address_id,
+          wallet_id: wallet.id,
+          exchange_rate: 0,
+          business: business,
+          reference: payload.data.reference
+        })
+        const transaction = await transRepo.save(newTrans)
+        wallet.amount = wallet.amount + parseFloat(payload.data.amount)
+        await walletRepo.save(wallet)
+
+        if (business.auto_offramp) {
+          console.log('Transaction saved')
+          const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
+          console.log('order created', order)
+          await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+          console.log('Withdrawal')
+          transaction.status = TransactionStatus.PROCESSING
+          transaction.offrampOrderId = order['id']
+          transaction.fiat_amount = parseFloat(payload.data.amount) * parseFloat(rate)
+          wallet.amount = wallet.amount - parseFloat(payload.data.amount)
+          await walletRepo.save(wallet)
+          await transRepo.save(transaction)
+        }
       }
-
-
-    } else if (payload.event === "withdraw.success") {
-
+      else {
+        throw new HttpException(400, 'Wallet or Business not found')
+      }
     }
 
-    else {
-      throw new HttpException(400, 'Wallet or Business not found')
-    }
     return 'Webhook received'
   }
 
@@ -145,18 +152,19 @@ export class WalletService {
     }
     const rateData: any = await response.json();
 
-    // const order = await this.createOrderPaycrest({ accountName: 'Pelumi Olufemi', accountNumber: '9053489201', amount: 10, bankName: 'OPAYNGPC', network: 'base', returnAddress: '0x2DC6836e58697Bf4Afd9BbA4C2330E1032cc9618', token: 'USDC', rate: rateData.data, reference: '' })
+    // const order = await this.createOrderPaycrest({ accountName: 'Pelumi Olufemi', accountNumber: '9053489201', amount: 5, bankName: 'OPAYNGPC', network: 'base', returnAddress: '0x2DC6836e58697Bf4Afd9BbA4C2330E1032cc9618', token: 'USDC', rate: rateData.data, reference: 'dfhhahs' })
     return { rate: rateData.data };
   }
 
   // create order on paycrest
   static createOrderPaycrest = async (payload: CreateOrder) => {
-    const rate = this.getRatePaycrest({ token: payload.token, amount: payload.amount, currency: "NGN", network: payload.network })
+    const { rate } = await this.getRatePaycrest({ token: payload.token, amount: payload.amount, currency: "NGN", network: payload.network })
     const orderData = {
       amount: payload.amount,
       token: payload.token,
       network: payload.network,
-      rate: parseFloat(payload.rate),
+      rate: rate,
+      // rate: payload.rate,
       recipient: {
         institution: payload.bankName,
         accountIdentifier: payload.accountNumber,
@@ -174,115 +182,94 @@ export class WalletService {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(orderData)
-      // body: JSON.stringify(orderData)
     });
     const order = await response.json()
-    console.log(order)
-    return order
+    return { order, rate }
   }
 
   //withdrawal on blockradar
   static withdrawBlockradar = async (payload: WithdrawalType, user: User) => {
-    const business = await busiRepo.createQueryBuilder('busi').where('busi.owner_id =:ownerId', { ownerId: user.id }).getOne()
-    const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id =:businessId', { businessId: business.id }).getOne()
+    // const business = await busiRepo.createQueryBuilder('busi').where('busi.owner_id =:ownerId', { ownerId: user.id }).getOne()
+    // const wallet = await walletRepo.createQueryBuilder('wallet').where('wallet.business_id =:businessId', { businessId: business.id }).getOne()
+    const walletId = envHelper.block_radar.wallet_id
+    const headers = {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json"
+    }
+    const asset = await fetch(`${b_baseUrl}/${walletId}/assets`, { headers: headers })
+    if (!asset.ok) {
+      throw new HttpException(400, asset.statusText)
+    }
+    const asset_res: any = await asset.json()
+    console.log('from asset res', asset_res.data[0].id)
     const body = {
-      assetId: envHelper.block_radar.wallet_id,
-      address: payload.amount,
-      amount: payload.amount.toString(),
+      assets: [{
+        id: asset_res.data[0].id,
+        address: payload.address,
+        amount: payload.amount.toString(),
+      }]
     }
-    const response = await fetch(`${b_baseUrl}/${envHelper.block_radar.wallet_id}/withdraw`, {
-      method: "POST",
-      headers: {
-        "API-Key": envHelper.block_radar.api_key,
-        "Content-Type": "application/json"
-      },
+    const url = `${b_baseUrl}/${walletId}/withdraw`;
+    const options = {
+      method: 'POST',
+      headers: headers,
       body: JSON.stringify(body)
-    })
+    };
+    const response = await fetch(url, options);
+    const data: any = await response.json();
 
-    if (!response.ok) {
-      throw new HttpException(400, 'Something went wrong')
+    if (data.statusCode !== 200) {
+      throw new HttpException(400, data.message)
     }
-    const data: any = await response.json()
-    if (!business.auto_offramp) {
-      const newTrans = transRepo.create({
-        transaction_id: data.data.id,
-        business_id: business.id,
-        token_amount: parseFloat(data.data.amount),
-        fiat_amount: 0,
-        fiat_currency: 'ngn',
-        token: data.data.asset.symbol,
-        chain: data.data.asset.standard || "base",
-        token_logo: data.data.asset.logoUrl,
-        gatewayTxId: data.data.hash,
-        metadata: data.data.metadata,
-        type: "WITHDRAWAL",
-        txHash: data.data.blockHash,
-        senderAddress: data.data.senderAddress,
-        businessAddress: wallet.wallet_address,
-        address_id: wallet.address_id,
-        wallet_id: wallet.id,
-        exchange_rate: 0,
-        business: business
-      })
-      await transRepo.save(newTrans)
-    }
-
-    return 'Withdrawal initiated'
+    return { message: 'Withdrawal request initiated initiated', data: data }
   }
 
   //webhook for paycrest
   // Server setup and webhook endpoint
-  static webhookPaycrest = () => {
+  static webhookPaycrest = async (payload) => {
+    console.log(payload)
+    const offrampId = payload.orderId
+    const transaction = await transRepo.createQueryBuilder('trans').where('trans.offrampOrderId =:offrampId ', { offrampId: offrampId }).getOne()
+    if (payload.event === 'order.settled') {
+      transaction.status = "SETTLED"
+      await transRepo.save(transaction)
+    }
+
+    if (payload.event === "order.failed") {
+      transaction.status = "FAILED"
+      await transRepo.save(transaction)
+    }
+
+    if (payload.event === "order.expired") {
+      transaction.status = "EXPIRED"
+      await transRepo.save(transaction)
+    }
+
+    return payload
   }
 }
 
-
-
-
-
-type WithdrawalType = {
-  amount: number,
-  address: string
-}
-
-const data = {
-  "address": "0x2DC6836e58697Bf4Afd9BbA4C2330E1032cc9618",
-  "name": "Mike_enterprises_ec3d1755-d942-446e-82dd-76992e581a8a",
-  "type": "INTERNAL",
-  "derivationPath": "m/44'/60'/0'/0/1",
-  "metadata": {
-    "business_id": "ec3d1755-d942-446e-82dd-76992e581a8a",
-    "user_id": "57e382ab-96d1-46be-b8cc-bae7bbe5cf9c",
-    "wallet_type": "bep20usdc"
-  },
-  "configurations": {
-    "aml": {
-      "provider": "ofac, fbi, tether, circle",
-      "status": "success",
-      "message": "Address is not sanctioned"
-    },
-    "showPrivateKey": false,
-    "disableAutoSweep": false,
-    "enableGaslessWithdraw": false
-  },
-  "network": "testnet",
-  "blockchain": {
-    "id": "28a730d3-211b-40f7-bb8f-dd589dcc738e",
-    "name": "base",
-    "symbol": "eth",
-    "slug": "base",
-    "derivationPath": "m/44'/60'/0'/0",
-    "isEvmCompatible": true,
-    "isL2": true,
-    "isActive": true,
-    "tokenStandard": null,
-    "createdAt": "2024-06-07T11:09:56.586Z",
-    "updatedAt": "2024-11-26T15:26:21.825Z",
-    "logoUrl": "https://res.cloudinary.com/blockradar/image/upload/v1716800080/crypto-assets/Base_Network_Logo_vqyh7r.png"
-  },
-  "key": null,
-  "id": "f05df715-8127-46b8-99ef-1c0928e4a6da",
-  "isActive": true,
-  "createdAt": "2025-09-01T00:22:19.706Z",
-  "updatedAt": "2025-09-01T00:22:19.706Z"
-}
+// const data: any = await response.json()
+// if (!business.auto_offramp) {
+//   const newTrans = transRepo.create({
+//     transaction_id: data.data.id,
+//     business_id: business.id,
+//     token_amount: parseFloat(data.data.amount),
+//     fiat_amount: 0,
+//     fiat_currency: 'ngn',
+//     token: data.data.asset.symbol,
+//     chain: data.data.asset.standard || "base",
+//     token_logo: data.data.asset.logoUrl,
+//     gatewayTxId: data.data.hash,
+//     metadata: data.data.metadata,
+//     type: "WITHDRAWAL",
+//     txHash: data.data.blockHash,
+//     senderAddress: data.data.senderAddress,
+//     businessAddress: wallet.wallet_address,
+//     address_id: wallet.address_id,
+//     wallet_id: wallet.id,
+//     exchange_rate: 0,
+//     business: business
+//   })
+//   await transRepo.save(newTrans)
+// }

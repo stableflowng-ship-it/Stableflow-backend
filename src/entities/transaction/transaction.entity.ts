@@ -20,6 +20,7 @@ export enum TransactionStatus {
   SETTLED = "SETTLED", // Transaction successfully processed and settled
   FAILED = "FAILED", // Transaction processing failed
   REFUNDED = "REFUNDED", // Transaction was refunded
+  EXPIRED = "EXPIRED"
 }
 
 export enum TransactionType {
@@ -40,7 +41,7 @@ export class Transaction {
   @Index()
   transaction_id: string;
 
-  @Column()
+  @Column({ nullable: true }) // remove the nullable in new db
   reference: string
 
   @Column({ nullable: false })
@@ -65,7 +66,6 @@ export class Transaction {
   chain: string;
 
   @Column({
-    type: "varchar",
     default: TransactionStatus.UNSETTLED,
   })
   status: string;
