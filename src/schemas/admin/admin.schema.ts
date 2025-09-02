@@ -33,7 +33,7 @@ export const getAllBusiOpts = {
       }
     }
   },
-  preHandler: [isAuth],
+  // preHandler: [isAuth],
   handler: AdminController.getAllBusiness
 }
 

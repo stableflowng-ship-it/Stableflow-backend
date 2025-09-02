@@ -38,7 +38,7 @@ export class AdminService {
     business.is_verified = true
     // await WalletServive.generateWalletAddress({ busiId: business.id })
     await busiRepo.save(business)
-    sendEmailBrevo({ htmlTemplate: ".../email_template/approved.html", subject: "Bussiness approved", to: business.email, html: {} })
+    sendEmailBrevo({ htmlTemplate: "../email_template/approved.html", subject: "Bussiness approved", to: business.email, html: {} })
     return { message: 'Business approved and wallet for the business has been generated' }
   }
 }

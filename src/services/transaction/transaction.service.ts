@@ -13,7 +13,7 @@ const busiRepo = AppDataSource.getRepository(Business)
 export class TransactionService {
 
   static getBusinessTransactions = async (businessId: string, user: User) => {
-    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).getOne()
+    const business = await busiRepo.createQueryBuilder('busi').where('busi.id = :businessId', { businessId }).orderBy('receivedAt', 'DESC').getOne()
 
     if (!business) {
       throw new HttpException(400, "Business doesn't exist")
