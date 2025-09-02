@@ -7,7 +7,8 @@ import { AppDataSource } from "../../data-source"
 import { User } from "../../entities/user/user.entities"
 import { Auth, SignInPayload } from "../../utils/dataTypes/user.datatypes"
 import { envHelper } from "../../config/env.helper"
-import { sendEmail } from "../../config/noreply.config"
+// import { sendEmail } from "../../config/noreply.config"
+import { sendEmailBrevo } from "../../config/brevo.cofig"
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -25,7 +26,7 @@ export class UserServices {
     }
     await userRepo.save(user) // alway update for login
     const otp = await sendOtp(user.email)
-    sendEmail({ to: user.email, subject: 'Your Stableflow Verification Token', html: { TOKEN: otp, YEAR: new Date().getFullYear() }, htmlPath: '../email_templates/token.html' }).catch(console.error)
+    sendEmailBrevo({ to: user.email, subject: 'Your Stableflow Verification Token', html: { TOKEN: otp, YEAR: new Date().getFullYear() }, htmlPath: '../email_templates/token.html' }).catch(console.error)
     return { message: "otp sent" }
   }
 

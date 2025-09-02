@@ -38,4 +38,22 @@ export class UserController {
       reply.code(400).send(error)
     }
   }
+
+  static logOut = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const data = { ...successData, message: 'Logout successful' }
+      reply.code(200).clearCookie("auth_token", {
+        path: '/',
+        httpOnly: true,
+        secure: envHelper.environ !== "localhost",
+        sameSite: envHelper.environ === "localhost" ? 'lax' : 'none',
+        domain: envHelper.environ !== "localhost" ? ".stable-flow.xyz" : undefined,
+        maxAge: 60 * 60 * 24 * 14,
+      }).send(data)
+    } catch (e: unknown) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
 }

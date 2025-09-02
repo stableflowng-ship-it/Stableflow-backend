@@ -35,6 +35,7 @@ export const envHelper = {
   cors: process.env.CORS,
   environ: process.env.ENVIRONMENT,
   token_pass: process.env.TOKEN_PASSWORD,
+  brevo_api: process.env.BREVO_API_KEY,
   paystack: {
     secret_key: process.env.PAYSTACK_SECRET_KEY,
   }
