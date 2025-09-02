@@ -9,6 +9,7 @@ import { Wallet } from "../../entities/business/wallet.entity"
 import { Transaction, TransactionStatus } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
 import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse, WithdrawalType } from "../../utils/dataTypes/wallet.datatype"
+import { sendEmailBrevo } from "../../config/brevo.cofig"
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
@@ -123,7 +124,8 @@ export class WalletService {
           console.log('Transaction saved')
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
           console.log('order created', order)
-          await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+          const check = await this.withdrawBlockradar({ address: order['receiveAddress']['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+          console.log(check)
           console.log('Withdrawal')
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = order['id']
@@ -132,6 +134,7 @@ export class WalletService {
           await walletRepo.save(wallet)
           await transRepo.save(transaction)
         }
+        sendEmailBrevo({ htmlTemplate: ".../email_template/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
       }
       else {
         throw new HttpException(400, 'Wallet or Business not found')
