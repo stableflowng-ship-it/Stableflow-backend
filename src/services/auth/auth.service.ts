@@ -45,6 +45,6 @@ export class UserServices {
     }
     const token: string = jwt.sign({ email: user.email }, envHelper.token_pass)
 
-    return { message: "User verified successfully" }
+    return { message: "User verified successfully", token }
   }
 }
