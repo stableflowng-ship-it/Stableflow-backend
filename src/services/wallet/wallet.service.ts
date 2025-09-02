@@ -123,8 +123,10 @@ export class WalletService {
         if (business.auto_offramp) {
           console.log('Transaction saved')
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
+          const { receiveAddress } = order.data
+          console.log('recieving', receiveAddress)
           console.log('order created', order)
-          const check = await this.withdrawBlockradar({ address: order['data']['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
+          const check = await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
           console.log(check)
           console.log('Withdrawal')
           transaction.status = TransactionStatus.PROCESSING
@@ -186,7 +188,7 @@ export class WalletService {
       },
       body: JSON.stringify(orderData)
     });
-    const order = await response.json()
+    const order: any = await response.json()
     return { order, rate }
   }
 
