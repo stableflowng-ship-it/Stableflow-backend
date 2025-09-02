@@ -49,3 +49,18 @@ export const verifyAccoRouteOpts = {
   },
   handler: UserController.verifyAccount
 }
+
+export const logOutOpts = {
+  schema: {
+    tags: ['Auth'],
+    summary: "logout",
+    response: {
+      201: {
+        description: 'Logout user',
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  handler: UserController.logOut
+}
