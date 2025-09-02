@@ -40,9 +40,9 @@ export async function sendEmailBrevo({ to, subject, html, htmlPath }: EmailType)
 
   try {
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log("✅ Email sent:", result);
+    // console.log("✅ Email sent:", result);
   } catch (error) {
-    console.error("❌ Email error:", error);
+    // console.error("❌ Email error:", error);
   }
 }
 
