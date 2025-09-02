@@ -6,7 +6,7 @@ import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { Wallet } from "../../entities/business/wallet.entity"
-import { Transaction } from "../../entities/transaction/transaction.entity"
+import { Transaction, TransactionStatus } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
 import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse, WithdrawalType } from "../../utils/dataTypes/wallet.datatype"
 
@@ -121,12 +121,15 @@ export class WalletService {
 
         if (business.auto_offramp) {
           console.log('Transaction saved')
-          const order = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
+          const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
           console.log('order created', order)
           await this.withdrawBlockradar({ address: order['receiveAddress'], amount: parseFloat(payload.data.amount) }, user)
           console.log('Withdrawal')
-          transaction.status = "PROCESSING"
+          transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = order['id']
+          transaction.fiat_amount = parseFloat(payload.data.amount) * parseFloat(rate)
+          wallet.amount = wallet.amount - parseFloat(payload.data.amount)
+          await walletRepo.save(wallet)
           await transRepo.save(transaction)
         }
       }
@@ -181,8 +184,7 @@ export class WalletService {
       body: JSON.stringify(orderData)
     });
     const order = await response.json()
-    console.log(order)
-    return order
+    return { order, rate }
   }
 
   //withdrawal on blockradar

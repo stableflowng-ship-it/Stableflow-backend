@@ -66,7 +66,6 @@ export class Transaction {
   chain: string;
 
   @Column({
-    type: "varchar",
     default: TransactionStatus.UNSETTLED,
   })
   status: string;

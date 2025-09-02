@@ -25,7 +25,7 @@ export class UserServices {
     }
     await userRepo.save(user) // alway update for login
     const otp = await sendOtp(user.email)
-    await sendEmail({ to: user.email, subject: 'Your Stableflow Verification Token', html: { TOKEN: otp, YEAR: new Date().getFullYear() }, htmlPath: '../email_templates/token.html' }).catch(console.error)
+    sendEmail({ to: user.email, subject: 'Your Stableflow Verification Token', html: { TOKEN: otp, YEAR: new Date().getFullYear() }, htmlPath: '../email_templates/token.html' }).catch(console.error)
     return { message: "otp sent" }
   }
 
@@ -45,6 +45,6 @@ export class UserServices {
     }
     const token: string = jwt.sign({ email: user.email }, envHelper.token_pass)
 
-    return { message: "User verified successfully", token }
+    return { message: "User verified successfully" }
   }
 }
