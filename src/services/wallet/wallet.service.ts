@@ -121,14 +121,9 @@ export class WalletService {
         await walletRepo.save(wallet)
 
         if (business.auto_offramp) {
-          console.log('Transaction saved')
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
           const { receiveAddress } = order.data
-          console.log('recieving', receiveAddress)
-          console.log('order created', order)
           const check = await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
-          console.log(check)
-          console.log('Withdrawal')
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = order['id']
           transaction.fiat_amount = parseFloat(payload.data.amount) * parseFloat(rate)
@@ -136,7 +131,7 @@ export class WalletService {
           await walletRepo.save(wallet)
           await transRepo.save(transaction)
         }
-        sendEmailBrevo({ htmlTemplate: "../email_template/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
+        sendEmailBrevo({ htmlTemplate: "../email_templates/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
       }
       else {
         throw new HttpException(400, 'Wallet or Business not found')
