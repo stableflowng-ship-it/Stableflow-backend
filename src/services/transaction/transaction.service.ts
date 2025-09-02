@@ -20,7 +20,7 @@ export class TransactionService {
     if (business.owner_id !== user.id) {
       throw new HttpException(403, 'Forbidden')
     }
-    const transactions = await transactionRepo.createQueryBuilder('trans').where('trans.business_id = :businessId', { businessId }).orderBy('busi.receivedAt', 'DESC').getMany()
+    const transactions = await transactionRepo.createQueryBuilder('trans').where('trans.business_id = :businessId', { businessId }).orderBy('trans.receivedAt', 'DESC').getMany()
     return transactions
   }
 }
