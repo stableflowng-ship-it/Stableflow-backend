@@ -29,16 +29,16 @@ export class AdminService {
       throw new HttpException(400, 'Business not found')
     }
 
-    if (business.onboarding_step === OnboardingStep.APPROVED) {
-      return { message: 'Business already approved' }
-    }
+    // if (business.onboarding_step === OnboardingStep.APPROVED) {
+    //   return { message: 'Business already approved' }
+    // }
 
     business.onboarding_step = OnboardingStep.APPROVED
     business.is_active = true
     business.is_verified = true
     // await WalletServive.generateWalletAddress({ busiId: business.id })
     await busiRepo.save(business)
-    sendEmailBrevo({ htmlTemplate: "../email_templates/approved.html", subject: "Bussiness approved", to: business.email, html: {} })
+    sendEmailBrevo({ htmlPath: "../email_templates/approved.html", subject: "Bussiness approved", to: business.email, html: {} }).catch(console.error)
     return { message: 'Business approved and wallet for the business has been generated' }
   }
 }

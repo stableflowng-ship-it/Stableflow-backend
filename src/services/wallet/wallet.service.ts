@@ -131,7 +131,7 @@ export class WalletService {
           await walletRepo.save(wallet)
           await transRepo.save(transaction)
         }
-        sendEmailBrevo({ htmlTemplate: "../email_templates/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
+        sendEmailBrevo({ htmlPath: "../email_templates/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
       }
       else {
         throw new HttpException(400, 'Wallet or Business not found')
