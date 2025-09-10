@@ -122,10 +122,10 @@ export class WalletService {
 
         if (business.auto_offramp) {
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-          const { receiveAddress } = order.data
+          const { receiveAddress, id } = order.data
           const check = await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
           transaction.status = TransactionStatus.PROCESSING
-          transaction.offrampOrderId = order['id']
+          transaction.offrampOrderId = id
           transaction.fiat_amount = parseFloat(payload.data.amount) * parseFloat(rate)
           wallet.amount = wallet.amount - parseFloat(payload.data.amount)
           await walletRepo.save(wallet)
@@ -170,7 +170,7 @@ export class WalletService {
         accountIdentifier: payload.accountNumber,
         accountName: payload.accountName,
         currency: 'NGN',
-        memo: 'Salary payment for January 2024'
+        memo: 'Offramping from stableflow'
       },
       reference: payload.reference,
       returnAddress: payload.returnAddress
@@ -231,17 +231,14 @@ export class WalletService {
     const offrampId = payload.orderId
     const transaction = await transRepo.createQueryBuilder('trans').where('trans.offrampOrderId =:offrampId ', { offrampId: offrampId }).getOne()
     if (payload.event === 'order.settled') {
-      transaction.status = "SETTLED"
+      transaction.status = TransactionStatus.SETTLED
+      transaction.isSettled = true
+      transaction.settledAt = new Date()
       await transRepo.save(transaction)
     }
 
-    if (payload.event === "order.failed") {
-      transaction.status = "FAILED"
-      await transRepo.save(transaction)
-    }
-
-    if (payload.event === "order.expired") {
-      transaction.status = "EXPIRED"
+    if (payload.event === "order.refunded") {
+      transaction.status = TransactionStatus.REFUNDED
       await transRepo.save(transaction)
     }
 
