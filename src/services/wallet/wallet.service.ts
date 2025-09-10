@@ -122,9 +122,7 @@ export class WalletService {
 
         if (business.auto_offramp) {
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-          console.log('order data', order.data)
           const { receiveAddress, id } = order.data
-          console.log(id)
           await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = id
@@ -228,8 +226,8 @@ export class WalletService {
   //webhook for paycrest
   // Server setup and webhook endpoint
   static webhookPaycrest = async (payload) => {
-    console.log(payload)
-    const offrampId = payload.orderId
+    console.log(payload.data)
+    const offrampId = payload.data.id
     const transaction = await transRepo.createQueryBuilder('trans').where('trans.offrampOrderId =:offrampId ', { offrampId: offrampId }).getOne()
     if (payload.event === 'order.settled') {
       transaction.status = TransactionStatus.SETTLED
