@@ -229,14 +229,15 @@ export class WalletService {
     console.log(payload.data)
     const offrampId = payload.data.id
     const transaction = await transRepo.createQueryBuilder('trans').where('trans.offrampOrderId =:offrampId ', { offrampId: offrampId }).getOne()
-    if (payload.event === 'order.settled') {
+    console.log('trans', transaction)
+    if (payload.data.status === 'settled') {
       transaction.status = TransactionStatus.SETTLED
       transaction.isSettled = true
       transaction.settledAt = new Date()
       await transRepo.save(transaction)
     }
 
-    if (payload.event === "order.refunded") {
+    if (payload.data.status === "refunded") {
       transaction.status = TransactionStatus.REFUNDED
       await transRepo.save(transaction)
     }
