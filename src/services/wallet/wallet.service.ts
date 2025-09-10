@@ -122,8 +122,9 @@ export class WalletService {
 
         if (business.auto_offramp) {
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-          console.log(order.data)
+          console.log('order data', order.data)
           const { receiveAddress, id } = order.data
+          console.log(id)
           await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = id
@@ -202,7 +203,6 @@ export class WalletService {
       throw new HttpException(400, asset.statusText)
     }
     const asset_res: any = await asset.json()
-    console.log('from asset res', asset_res.data[0].id)
     const body = {
       assets: [{
         id: asset_res.data[0].id,
