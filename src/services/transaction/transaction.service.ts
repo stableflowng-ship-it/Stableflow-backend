@@ -4,7 +4,7 @@ import { AppDataSource } from "../../data-source"
 import { Business } from "../../entities/business/business.entity"
 import { User } from "../../entities/user/user.entities"
 import HttpException from "../../config/error.config"
-import { Transaction } from "../../entities/transaction/transaction.entity"
+import { Transaction, TransactionStatus } from "../../entities/transaction/transaction.entity"
 
 
 const transactionRepo = AppDataSource.getRepository(Transaction)
@@ -20,7 +20,7 @@ export class TransactionService {
     if (business.owner_id !== user.id) {
       throw new HttpException(403, 'Forbidden')
     }
-    const transactions = await transactionRepo.createQueryBuilder('trans').where('trans.business_id = :businessId', { businessId }).orderBy('trans.receivedAt', 'DESC').getMany()
+    const transactions = await transactionRepo.createQueryBuilder('trans').where('trans.business_id = :businessId', { businessId }).andWhere("trans.status NOT IN (:...statuses)", { statuses: ["REFUNDED", "UNSETTLED"] }).orderBy('trans.receivedAt', 'DESC').getMany()
     return transactions
   }
 }

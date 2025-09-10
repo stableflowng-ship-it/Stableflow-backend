@@ -15,12 +15,10 @@ import { Business } from "../business/business.entity";
 // import { OfframpAttempt } from './offramp-attempt.entity';
 
 export enum TransactionStatus {
-  UNSETTLED = "UNSETTLED", // Transaction received but not processed
-  PROCESSING = "PROCESSING", // Transaction is being processed
-  SETTLED = "SETTLED", // Transaction successfully processed and settled
-  FAILED = "FAILED", // Transaction processing failed
-  REFUNDED = "REFUNDED", // Transaction was refunded
-  EXPIRED = "EXPIRED"
+  CONFIRMED = "CONFIRMED",
+  PROCESSING = "PROCESSING",
+  SETTLED = "SETTLED",
+  REFUNDED = "REFUNDED",
 }
 
 export enum TransactionType {
@@ -41,7 +39,7 @@ export class Transaction {
   @Index()
   transaction_id: string;
 
-  @Column({ nullable: true }) // remove the nullable in new db
+  @Column({ nullable: true })
   reference: string
 
   @Column({ nullable: false })
@@ -66,7 +64,7 @@ export class Transaction {
   chain: string;
 
   @Column({
-    default: TransactionStatus.UNSETTLED,
+    default: TransactionStatus.CONFIRMED,
   })
   status: string;
 

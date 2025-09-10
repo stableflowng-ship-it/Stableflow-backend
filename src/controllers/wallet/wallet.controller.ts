@@ -81,7 +81,7 @@ export class WalletControllers {
     try {
       const signature = req.headers['x-paycrest-signature'] as string | undefined;
       if (!signature) throw new HttpException(401, 'Not authentication')
-      if (!verifyPaycrestSignature(req.body, signature, process.env.API_SECRET!)) {
+      if (!verifyPaycrestSignature(req.body, signature, envHelper.paycrest.secert_key!)) {
         return reply.status(401).send("Invalid signature");
       }
       const response = await WalletService.webhookPaycrest(req.body)
@@ -96,12 +96,12 @@ export class WalletControllers {
 }
 
 
-function verifyPaycrestSignature(requestBody, signatureHeader, secretKey) {
+function verifyPaycrestSignature(requestBody, signatureHeader: string, secretKey: string) {
   const calculatedSignature = calculateHmacSignature(requestBody, secretKey);
   return signatureHeader === calculatedSignature;
 }
 
-function calculateHmacSignature(data, secretKey) {
+function calculateHmacSignature(data, secretKey: string) {
   const crypto = require('crypto');
   const key = Buffer.from(secretKey);
   const hash = crypto.createHmac("sha256", key);

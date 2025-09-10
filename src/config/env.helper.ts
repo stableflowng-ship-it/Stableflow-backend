@@ -22,6 +22,7 @@ export const envHelper = {
   },
   paycrest: {
     api_key: process.env.PAYCREST_API,
+    secert_key: process.env.PAYCREST_SECRET_KEY
   },
   redis: {
     host: process.env.REDIS_HOST,
