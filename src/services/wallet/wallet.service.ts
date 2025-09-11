@@ -126,7 +126,10 @@ export class WalletService {
           await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = id
-          transaction.fiat_amount = parseFloat(payload.data.amount) * parseFloat(rate)
+          transaction.exchange_rate = parseFloat(rate)
+          transaction.fiat_amount = parseFloat((parseFloat(payload.data.amount) * parseFloat(rate)).toFixed(2))
+          transaction.recipientAcct = business.bankDetails.accountNumber
+          transaction.recipientBank = business.bankDetails.bankName
           wallet.amount = wallet.amount - parseFloat(payload.data.amount)
           await walletRepo.save(wallet)
           await transRepo.save(transaction)
