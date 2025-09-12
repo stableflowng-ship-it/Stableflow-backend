@@ -61,7 +61,6 @@ export class WalletControllers {
     } catch (e: unknown) {
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
-      console.log('error ', error)
       reply.code(400).send(error)
     }
   }

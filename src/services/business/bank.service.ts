@@ -83,7 +83,6 @@ export class BankService {
       body: JSON.stringify(body)
     };
     const response = await fetch(url, options);
-    console.log(response)
     if (!response.ok) {
       throw new HttpException(400, 'Bank not found!')
     }
