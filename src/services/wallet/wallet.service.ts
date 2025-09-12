@@ -122,12 +122,14 @@ export class WalletService {
 
         if (business.auto_offramp) {
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
-          console.log(order.data)
           const { receiveAddress, id } = order.data
           await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = id
-          transaction.fiat_amount = parseFloat(payload.data.amount) * parseFloat(rate)
+          transaction.exchange_rate = parseFloat(rate)
+          transaction.fiat_amount = parseFloat((parseFloat(payload.data.amount) * parseFloat(rate)).toFixed(2))
+          transaction.recipientAcct = business.bankDetails.accountNumber
+          transaction.recipientBank = business.bankDetails.bankName
           wallet.amount = wallet.amount - parseFloat(payload.data.amount)
           await walletRepo.save(wallet)
           await transRepo.save(transaction)
@@ -202,7 +204,6 @@ export class WalletService {
       throw new HttpException(400, asset.statusText)
     }
     const asset_res: any = await asset.json()
-    console.log('from asset res', asset_res.data[0].id)
     const body = {
       assets: [{
         id: asset_res.data[0].id,
@@ -228,17 +229,18 @@ export class WalletService {
   //webhook for paycrest
   // Server setup and webhook endpoint
   static webhookPaycrest = async (payload) => {
-    console.log(payload)
-    const offrampId = payload.orderId
+    console.log(payload.data)
+    const offrampId = payload.data.id
     const transaction = await transRepo.createQueryBuilder('trans').where('trans.offrampOrderId =:offrampId ', { offrampId: offrampId }).getOne()
-    if (payload.event === 'order.settled') {
+    console.log('trans', transaction)
+    if (payload.data.status === 'settled') {
       transaction.status = TransactionStatus.SETTLED
       transaction.isSettled = true
       transaction.settledAt = new Date()
       await transRepo.save(transaction)
     }
 
-    if (payload.event === "order.refunded") {
+    if (payload.data.status === "refunded") {
       transaction.status = TransactionStatus.REFUNDED
       await transRepo.save(transaction)
     }

@@ -113,6 +113,12 @@ export class Transaction {
   @Column({ nullable: true, type: "jsonb" })
   settlementData: any;
 
+  @Column({ nullable: true })
+  recipientAcct: string
+
+  @Column({ nullable: true })
+  recipientBank: string
+
   @CreateDateColumn()
   receivedAt: Date;
 
