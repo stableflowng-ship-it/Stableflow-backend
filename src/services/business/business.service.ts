@@ -35,7 +35,7 @@ export class BusinessService {
   }
 
   static getUserBusiness = async (user: User) => {
-    const getBusi = await busiRepo.createQueryBuilder('busi').where('busi.owner_id = :ownerId', { ownerId: user.id }).getOne()
+    const getBusi = await busiRepo.createQueryBuilder('busi').leftJoinAndSelect('busi.bankDetails', 'bankDetails').where('busi.owner_id = :ownerId', { ownerId: user.id }).getOne()
     return getBusi
   }
 
