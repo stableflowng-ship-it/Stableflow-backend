@@ -52,7 +52,7 @@ export class AdminService {
   }
 
   static getAllTransactions = async () => {
-    const trans = await transactionRepo.createQueryBuilder('trans').leftJoinAndSelect('trans.business', 'business').where("trans.status NOT IN (:...statuses)", { statuses: ["REFUNDED", "UNSETTLED"] }).getMany()
+    const trans = await transactionRepo.createQueryBuilder('trans').leftJoinAndSelect('trans.business', 'business').where("trans.status NOT IN (:...statuses)", { statuses: ["REFUNDED", "UNSETTLED", "PROCESSING"] }).getMany()
     return trans
   }
 
