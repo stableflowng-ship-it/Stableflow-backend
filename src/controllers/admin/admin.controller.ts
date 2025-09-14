@@ -32,5 +32,28 @@ export class AdminController {
     }
   }
 
+  static getAllUsers = async (_: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const response = await AdminService.getAllUsers()
+      const data = { ...successData, data: response, message: "All business" }
+      reply.code(200).send(data)
+    } catch (e) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
+
+  static getAllTransactions = async (_: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const response = await AdminService.getAllTransactions()
+      const data = { ...successData, data: response, message: "All business" }
+      reply.code(200).send(data)
+    } catch (e) {
+      const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
+      const error = { ...failureData, error: errorMessage }
+      reply.code(400).send(error)
+    }
+  }
 
 }
