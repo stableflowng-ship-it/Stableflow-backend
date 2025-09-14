@@ -51,3 +51,31 @@ export const approveBusiOpts = {
   },
   handler: AdminController.approveBusiness
 }
+
+export const getAllUser = {
+  schema: {
+    tags: ['Admin'],
+    summary: "Get all user",
+    response: {
+      200: {
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  handler: AdminController.getAllUsers
+}
+
+export const getTrans = {
+  schema: {
+    tags: ['Admin'],
+    summary: "Get all Transactions",
+    response: {
+      200: {
+        type: 'object',
+        ...successDataSchema
+      }
+    }
+  },
+  handler: AdminController.getAllTransactions
+}
