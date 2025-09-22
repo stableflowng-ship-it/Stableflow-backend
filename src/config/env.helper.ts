@@ -1,6 +1,7 @@
 // 
 require('dotenv').config()
 export const envHelper = {
+  admin_emal: process.env.ADMIN_EMAIL,
   db: {
     host: process.env.DATABASE_HOST,
     port: parseInt(process.env.DATABASE_PORT),
