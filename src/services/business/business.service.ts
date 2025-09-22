@@ -1,5 +1,7 @@
 // 
 
+import { sendEmailBrevo } from "../../config/brevo.cofig"
+import { envHelper } from "../../config/env.helper"
 import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
 import { Business } from "../../entities/business/business.entity"
@@ -21,6 +23,8 @@ export class BusinessService {
     newBusiness.category_name = payload.category_name
 
     const saved = await busiRepo.save(newBusiness)
+
+    sendEmailBrevo({ htmlPath: "../email_templates/new_business.html", subject: "We have a new Business", to: envHelper.admin_emal, html: { name: saved.name, id: saved.id, cat: saved.category_name } })
 
     return { message: "Business created", data: saved }
   }
