@@ -20,7 +20,7 @@ type EmailType = {
   subject: string,
   html: object,
   htmlPath?: string,
-  htmlTemplate?: string
+  // htmlTemplate?: string
 }
 
 

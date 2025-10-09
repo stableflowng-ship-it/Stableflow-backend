@@ -110,5 +110,6 @@ app.register(require('./routes/business/business.routes'), { prefix: `${prefix}/
 app.register(require('./routes/admin/admin.routes'), { prefix: `${prefix}/admin` })
 app.register(require('./routes/wallet/wallet.routes'), { prefix: `${prefix}/wallet` })
 app.register(require('./routes/transaction/transaction.routes'), { prefix: `${prefix}/transaction` })
+app.register(require('./routes/waitlist.routes'), { prefix: `${prefix}/waitlist` })
 
 export default app

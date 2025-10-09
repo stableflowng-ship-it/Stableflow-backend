@@ -5,7 +5,6 @@ import Handlebars from 'handlebars'
 import { envHelper } from './env.helper'
 const fs = require('fs')
 const path = require('path')
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 type EmailType = {
   to: string,
