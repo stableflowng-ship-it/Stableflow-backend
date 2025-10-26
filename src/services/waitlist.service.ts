@@ -1,6 +1,6 @@
 // 
 
-import { sendEmailBrevo } from "../config/brevo.cofig"
+import { sendEmailResend } from "../config/resend.config"
 import { AppDataSource } from "../data-source"
 import { Waitlist } from "../entities/waitlist/waitlist.entity"
 
@@ -11,7 +11,7 @@ export class WaitlistService {
     const newW = new Waitlist
     newW.email = payload.email
     await wailistRepo.save(newW)
-    sendEmailBrevo({ html: {}, subject: "Welcome to the waitlist — something big is coming 👀", to: payload.email, htmlPath: "../email_templates/waitlist.html", })
+    sendEmailResend({ html: {}, subject: "Welcome to the waitlist — something big is coming 👀", to: payload.email, htmlPath: "../email_templates/waitlist.html", })
     return "Your email has been added to the waitlist"
   }
 }

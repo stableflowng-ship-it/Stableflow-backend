@@ -1,7 +1,7 @@
 // 
 
-import { sendEmailBrevo } from "../../config/brevo.cofig"
 import HttpException from "../../config/error.config"
+import { sendEmailResend } from "../../config/resend.config"
 import { AppDataSource } from "../../data-source"
 import { Business, OnboardingStep } from "../../entities/business/business.entity"
 import { Transaction } from "../../entities/transaction/transaction.entity"
@@ -29,7 +29,7 @@ export class AdminService {
     business.is_verified = true
     // await WalletServive.generateWalletAddress({ busiId: business.id })
     await busiRepo.save(business)
-    sendEmailBrevo({ htmlPath: "../email_templates/approved.html", subject: "Bussiness approved", to: business.email, html: {} }).catch(console.error)
+    sendEmailResend({ htmlPath: "../email_templates/approved.html", subject: "Bussiness approved", to: business.email, html: {} }).catch(console.error)
     return { message: 'Business approved and wallet for the business has been generated' }
   }
 
