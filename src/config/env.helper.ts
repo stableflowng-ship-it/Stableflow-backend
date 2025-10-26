@@ -14,6 +14,7 @@ export const envHelper = {
     username: process.env.NOREPLY_USERNAME,
     password: process.env.NOREPLY_PASSWORD,
     email: process.env.NOREPLY_EMAIL,
+    resend: process.env.RESEND_API_KEY
   },
   block_radar: {
     api_key: process.env.BLOCKRADAR_API_KEY,

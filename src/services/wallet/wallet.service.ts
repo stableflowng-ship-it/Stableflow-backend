@@ -1,6 +1,5 @@
 // 
 
-import { createHmac } from "crypto"
 import { envHelper } from "../../config/env.helper"
 import HttpException from "../../config/error.config"
 import { AppDataSource } from "../../data-source"
@@ -8,8 +7,8 @@ import { Business, OnboardingStep } from "../../entities/business/business.entit
 import { Wallet } from "../../entities/business/wallet.entity"
 import { Transaction, TransactionStatus } from "../../entities/transaction/transaction.entity"
 import { User } from "../../entities/user/user.entities"
-import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPaycrest, WebhookPayload, WithdrawalResponse, WithdrawalType } from "../../utils/dataTypes/wallet.datatype"
-import { sendEmailBrevo } from "../../config/brevo.cofig"
+import { CreateOrder, CreateWallet, GetRate, WalletAddressRequest, WebhookPayload, WithdrawalType } from "../../utils/dataTypes/wallet.datatype"
+import { sendEmailResend } from "../../config/resend.config"
 
 const busiRepo = AppDataSource.getRepository(Business)
 const walletRepo = AppDataSource.getRepository(Wallet)
@@ -134,7 +133,7 @@ export class WalletService {
           await walletRepo.save(wallet)
           await transRepo.save(transaction)
         }
-        sendEmailBrevo({ htmlPath: "../email_templates/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
+        sendEmailResend({ htmlPath: "../email_templates/notication.html", subject: "Deposit recieved", to: user.email, html: { name: user.full_name, amount: payload.data.amount, date: payload.data.createdAt } })
       }
       else {
         throw new HttpException(400, 'Wallet or Business not found')

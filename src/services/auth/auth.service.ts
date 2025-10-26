@@ -1,6 +1,6 @@
 // 
 
-import fastify from "fastify"
+
 import HttpException from "../../config/error.config"
 import { sendOtp, verifyOtp } from "../../config/redis.config"
 import { AppDataSource } from "../../data-source"
@@ -8,9 +8,8 @@ import { User } from "../../entities/user/user.entities"
 import { Auth, SignInPayload } from "../../utils/dataTypes/user.datatypes"
 import { envHelper } from "../../config/env.helper"
 // import { sendEmail } from "../../config/noreply.config"
-import { sendEmailBrevo } from "../../config/brevo.cofig"
+import { sendEmailResend } from "../../config/resend.config"
 var jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
 const userRepo = AppDataSource.getRepository(User)
 
@@ -26,7 +25,7 @@ export class UserServices {
     }
     await userRepo.save(user) // alway update for login
     const otp = await sendOtp(user.email)
-    sendEmailBrevo({ to: user.email, subject: 'Your Stableflow Verification Token', html: { TOKEN: otp, YEAR: new Date().getFullYear() }, htmlPath: '../email_templates/token.html' }).catch(console.error)
+    sendEmailResend({ to: user.email, subject: 'Your Stableflow Verification Token', html: { TOKEN: otp, YEAR: new Date().getFullYear() }, htmlPath: '../email_templates/token.html' }).catch(console.error)
     return { message: "otp sent" }
   }
 
