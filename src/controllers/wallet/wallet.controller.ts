@@ -59,6 +59,7 @@ export class WalletControllers {
       const data = { ...successData, data: response, message: 'Webhook for blockradar', code: 201 }
       reply.code(201).send(data)
     } catch (e: unknown) {
+      console.log(e, "error")
       const errorMessage = (e instanceof Error) ? e.message : 'Something went wrong';
       const error = { ...failureData, error: errorMessage }
       reply.code(400).send(error)
