@@ -20,7 +20,8 @@ export const envHelper = {
     api_key: process.env.BLOCKRADAR_API_KEY,
     network: process.env.NETWORK,
     wallet_id: process.env.WALLET_ID,
-    wallet_address: process.env.WALLET_ADDRESS
+    wallet_address: process.env.WALLET_ADDRESS,
+    usdc_address: process.env.USDC_BASE_ADDRESS,
   },
   paycrest: {
     api_key: process.env.PAYCREST_API,

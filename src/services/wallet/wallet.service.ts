@@ -85,7 +85,6 @@ export class WalletService {
 
   //webhook for blockradar
   static webhookBlockradar = async (payload: WebhookPayload) => {
-
     if (payload.event === "deposit.success") {
       const transaction = await transRepo.findOneBy({ transaction_id: payload.data.id })
       if (transaction) return 'Transation already created'
@@ -122,7 +121,8 @@ export class WalletService {
         if (business.auto_offramp) {
           const { order, rate } = await this.createOrderPaycrest({ accountName: business.bankDetails.accountName, accountNumber: business.bankDetails.accountNumber, amount: parseFloat(payload.data.amount), bankName: business.bankDetails.bankCode, network: 'base', returnAddress: wallet.wallet_address, token: 'USDC', reference: transaction.reference })
           const { receiveAddress, id } = order.data
-          await this.withdrawBlockradar({ address: receiveAddress, amount: parseFloat(payload.data.amount) }, user)
+          console.log(order)
+          await this.withdrawContract({ address: receiveAddress, amount: parseFloat(payload.data.amount) })
           transaction.status = TransactionStatus.PROCESSING
           transaction.offrampOrderId = id
           transaction.exchange_rate = parseFloat(rate)
@@ -218,7 +218,48 @@ export class WalletService {
     };
     const response = await fetch(url, options);
     const data: any = await response.json();
+    if (data.statusCode !== 200) {
+      throw new HttpException(400, data.message)
+    }
+    return { message: 'Withdrawal request initiated initiated', data: data }
+  }
 
+  static withdrawContract = async (payload: WithdrawalType) => {
+    const walletId = envHelper.block_radar.wallet_id
+    const headers = {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json"
+    }
+    const body = {
+      abi: [
+        {
+          "constant": false,
+          "inputs": [
+            { "name": "_to", "type": "address" },
+            { "name": "_value", "type": "uint256" }
+          ],
+          "name": "transfer",
+          "outputs": [],
+          "payable": false,
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "address": envHelper.block_radar.usdc_address,
+      "method": "transfer",
+      parameters: [
+        payload.address,
+        payload.amount * 1000000
+      ]
+    }
+    const url = `${b_baseUrl}/${walletId}/contracts/write`;
+    const options = {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body)
+    };
+    const response = await fetch(url, options);
+    const data: any = await response.json();
     if (data.statusCode !== 200) {
       throw new HttpException(400, data.message)
     }
